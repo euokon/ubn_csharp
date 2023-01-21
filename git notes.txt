@@ -1,0 +1,11 @@
+git init -- create local repository
+git clone -- to copy a reposistory into your local device
+git commit -m "commit message" -- to push your code
+git pull URL -- you get the latest version of updates
+git push -- push to the remote repository
+git status -- check if it has been saved
+git log -- check commit history
+git fetch <branch URL> <branch name> --- works like git pull
+git rebase --revert to previous version
+git branch <branch name>-- branch out to any branch available to you
+git checkout <branch name> -- switch to a new branch without making a commit
