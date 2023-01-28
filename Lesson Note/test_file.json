@@ -15,8 +15,34 @@
       "designation": "Report Analyst"
   },
   {
-      "name": "",
-      "department": "",
-      "designation": ""
+    "name": "Tashy",
+    "department": "Data & Analytics",
+    "designation": "Data solution developer"
+  },
+  {
+    "name": "",
+    "department": "",
+    "designation": ""
+  },
+  {
+    "name": "Mofi",
+    "department": "Data and Analytics",
+    "designation": "Business Analyst"
+  },
+  {
+        "name": "Nathan",
+        "department": "DAO",
+        "designation": "Data Scientist"
+  },
+  {
+      "name": "Samson",
+      "department": "Data Analytics Office",
+      "designation": "Data Analyst"
+  },
+  {
+    "name": "Victor",
+    "department": "Data & Analytics Office",
+    "designation": "Data Analyst"
+
   }
 ]
