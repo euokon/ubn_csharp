@@ -1,4 +1,5 @@
-    {
+    [
+      {
         "name": "Emmanuel",
         "department": "Solution Delivery",
         "designation": "Software Developer"
@@ -8,3 +9,8 @@
         "department": "DAO",
         "designation": "Data Scientist"
     }
+      "name": "",
+      "department": "",
+      "designation": ""
+  }
+]
