@@ -38,5 +38,11 @@
       "name": "Samson",
       "department": "Data Analytics Office",
       "designation": "Data Analyst"
+  },
+  {
+    "name": "Victor",
+    "department": "Data & Analytics Office",
+    "designation": "Data Analyst"
+
   }
 ]
