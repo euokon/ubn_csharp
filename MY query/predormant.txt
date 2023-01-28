@@ -1,0 +1,71 @@
+create table pre_dormancy_tbl as
+select branch_code,
+       cust_no,
+       cust_ac_no,
+       ac_desc,
+       Customer_type,
+       acc_class_desc,
+       ac_open_date,
+       ac_stat_dormant,
+       lcy_curr_balance,
+       last_txn_date,
+       predormancy_days,
+       Predormancy_status,
+       business_segment,
+       dormancy_date,
+       br_name,
+       area,
+       region,
+       rm_code,
+       rm_name,
+       rm_segment
+  from(select a.branch_code,
+       a.cust_no,
+       a.cust_ac_no,
+       a.ac_desc,
+       decode(UPPER(a.customer_type),
+              'C',
+              'CORPORATE',
+              'I',
+              'INDIVIDUAL',
+              'OTHERS') Customer_type,
+       a.acc_class_desc,
+       a.ac_open_date,
+       a.ac_stat_dormant,
+       a.lcy_curr_balance,
+       a.last_txn_date,
+       floor((months_between(sysdate, a.dormancy_date) / 12) * 365) predormancy_days,
+       case
+         when floor((sysdate - a.last_txn_date)) between 350 and 365 then
+          '15_Days_Category'
+         when floor((sysdate - a.last_txn_date)) between 335 and 350 then
+          '30_Days_Category'
+         when floor((sysdate - a.last_txn_date)) between 305 and 335 then
+          '60_Days_Category'
+         when floor((sysdate - a.last_txn_date)) between 275 and 305 then
+          '90_Days_Category'
+       end as Predormancy_status,
+       a.business_segment,
+       a.dormancy_date,
+       d.br_name,
+       d.area,
+       d.region,
+       e.rm_code,
+       e.rm_name,
+       e.rm_segment
+  from account_master        a,
+       dw_acct_active_status c,
+       new_branch_map        d,
+       rm_map                e
+ where a.cust_ac_no = c.cust_ac_no(+)
+   and a.branch_code = d.br_code(+)
+   and a.rm_code = e.rm_code(+)
+   and a.dormancy_date > sysdate
+   and a.record_stat = 'O'
+   and a.ac_stat_dormant = 'N')
+ where Predormancy_status in ('15_Days_Category',
+                              '30_Days_Category',
+                              '60_Days_Category',
+                              '90_Days_Category')
+   and dormancy_date < sysdate + 365;
+commit;

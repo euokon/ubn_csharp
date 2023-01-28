@@ -1,0 +1,10 @@
+(1)select count(*) from customer_master where active_status = 'ACTIVE'
+
+
+
+(2)select *
+  from (select cust_ac_no, ac_desc, sum(balance)
+          from loans_tbl@finance
+         group by cust_ac_no, ac_desc
+         order by sum(balance) desc)
+ where rownum between 1 and 10;

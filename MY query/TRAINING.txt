@@ -1,0 +1,124 @@
+declare
+username varchar2(30)  := 'Brian';
+session_date date := sysdate;
+reg_num number default 1001;
+seat_num constant number := 6;
+dept_id number := 0;
+
+begin
+  dbms_output.put_line('Hello' || username || ', welcome to PL/SQL Training');
+  dbms_output.put_line('********************');
+  dbms_output.put_line('I completed my registration on ' || session_date || ', and my registration number is '
+  || reg_num);
+  dbms_output.put_line('********************');
+  dbms_output.put_line('My department ID is ' || dept_id);
+  dbms_output.put_line('********************');
+  dbms_output.put_line('My seat number is ' || seat_num);
+  
+end;
+
+
+---------------------------------------------------------------------------------------------------
+
+declare
+  account_num varchar2(10) := '0124495895';
+  customer_num   varchar2(9);
+  cust_name  varchar2(100);
+  relationship_date date;
+  available_balance number;
+  
+begin
+   select cust_no
+   into customer_num
+   from account_master
+   where cust_ac_no = account_num;
+   
+   
+   select customer_name, cif_creation_date
+   into cust_name, relationship_date
+   from customer_master
+   where customer_no = customer_num;
+   
+   select lcy_curr_balance
+   into available_balance
+   from account_master
+   where cust_ac_no = account_num;
+   
+  dbms_output.put_line('Customer name: ' || cust_name);
+  dbms_output.put_line('Relationship date: ' || relationship_date);
+  dbms_output.put_line('Available balance: ' || available_balance);
+end;
+
+
+------------------------------------------------------------------------------------------------
+
+declare
+  --area float;
+  pi float default 3.142;
+  radius number := 7;
+  
+begin
+  dbms_output.put_line('Area= ' || pi * radius * radius);
+
+end;
+
+-------------------------------------------------------------------------------------------------
+create or replace function fn_avl_bal_bo return number is
+avl_bal number;
+
+begin
+  select lcy_curr_balance + 1000000 into avl_bal
+  from account_master
+  where cust_ac_no = '0124495895';
+  
+  return avl_bal;
+  
+  
+  end;
+  
+  
+  
+create or replace function fn_avl_bal_bo(acct_no in varchar2) return number is
+avl_bal number;
+
+begin
+  select lcy_curr_balance + 1000000 into avl_bal
+  from account_master
+  where cust_ac_no = acct_no;
+  
+  return avl_bal;
+  
+  
+  end;
+
+
+  --select fn_var_bal_bo, lcy_curr_balance, lcy_opening_bal, a.* from account_master a
+  --where cust_ac_no = '0124495895'
+  
+select fn_var_bal_bo(cust_ac_no), lcy_curr_balance, lcy_opening_bal, a.* from account_master a
+  where cust_ac_no = '0124495895'
+
+
+----------------------------------------------------------------------------------------------------
+
+
+declare
+  account_num varchar2(10) := '0124495895';
+  customer_num   varchar2(9);
+  cust_name  varchar2(100);
+  relationship_date number;
+
+  
+begin
+   select cust_ac_no, cust_no, ac_desc, floor(months_between(sysdate, ac_open_date)) relationship_date
+   into account_num, customer_num, cust_name, relationship_date 
+   from account_master
+   where cust_ac_no = account_num;
+
+  
+  dbms_output.put_line('Customer name: ' || cust_name);
+  dbms_output.put_line('Customer num: ' || customer_num);
+  dbms_output.put_line('Account num: ' || account_num);
+  dbms_output.put_line('Relationship date= ' || relationship_date);
+
+end;

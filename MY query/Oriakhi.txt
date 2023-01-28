@@ -1,0 +1,17 @@
+select customer_name, customer_acc_no, account_type, last_transaction_date, currency_type, current_balance
+  from (select ac_desc customer_name,
+               cust_ac_no customer_acc_no,
+               decode(UPPER(customer_type),
+                      'C',
+                      'CORPORATE',
+                      'I',
+                      'INDIVIDUAL',
+                      'OTHERS') account_type,
+                last_txn_date last_transaction_date,
+                ccy currency_type,
+                lcy_curr_balance current_balance,
+               floor((months_between(sysdate, dormancy_date) / 12) * 365) dormancy_days
+          from account_master
+         where record_stat = 'O'
+           and ac_stat_dormant = 'Y')
+ where dormancy_days >= '3650'

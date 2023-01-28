@@ -1,0 +1,35 @@
+----Agent data
+select * from
+(select a.agent_id,
+       b.trans_amt,
+       b.fee,
+       trunc(b.trans_date) trans_date
+from
+agn_data_tbl a, agn_txn_tbl b
+where a.agent_id = b.userid(+))
+
+
+
+----Txn data
+
+select * from (select description, trans_date, count(userid)
+          from (select a.*,
+                       c.description
+                  from agn_txn_tbl a,
+                       dw_agn_data_tbl   b,
+                       agn_service_tbl   c
+                 where a.userid = b.agent_id(+)
+                   and a.trans_type = c.servicecode(+))
+         group by description, trans_date
+         order by count(userid))
+   where description in ('Cash withdrawal',
+                       'Cash Deposit',
+                       'Cash withdrawal card other bank',
+                       'Cashwithdrawal Card Union bank',
+                       'Fund Transfer Other Bank',
+                       'Fund Transfer Own Bank',
+                       'Fundtransfer Card Otherbank',
+                       'Fundtransfer Card Union bank')
+
+
+

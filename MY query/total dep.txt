@@ -1,0 +1,18 @@
+select b.br_code, a.period, a.dep_cat, sum(a.lcy_balance)         
+  from dep_tbl_me_hist a, new_branch_map b
+ where a.branch_code = b.br_code(+)
+   and a.dep_cat in ('CURRENT', 'SAVINGS', 'CASA_DOM', 'DOM', 'TIME')
+   and a.period BETWEEN '202012' AND '202211'
+ group by b.br_code, dep_cat, a.period
+ order by sum(a.lcy_balance)
+
+
+
+
+select b.br_code, a.period, a.dep_cat, sum(a.cr_bal_lcy)         
+  from dep_tbl_me a, new_branch_map b
+ where a.branch_code = b.br_code(+)
+   and a.dep_cat in ('LC_MARGIN_LCY', 'LC_MARGIN_FCY', 'COL_DEP', 'LC_MARGIN', 'COLLECTION')
+   and a.period BETWEEN '202012' AND '202211'
+ group by b.br_code, dep_cat, a.period
+ order by sum(a.cr_bal_lcy)

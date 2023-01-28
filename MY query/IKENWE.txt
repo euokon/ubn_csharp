@@ -1,0 +1,36 @@
+select a.*,D.MESSAGE MEMO from(select a.cust_no,
+       a.cust_ac_no,e.user_id,e.auth_id,e.dr_account,e.dr_amount,e.value_dt,e.narration,
+       a.pnd,f.ac_stat_no_dr, f.status_change_date,
+       a.pnd_reason,x.msg,
+       a.pnd_date,
+       a.bus_sgt,
+       a.account_class,
+       a.cat,
+       a.ac_open_date,c.unionmobile,c.uniononline,c.atmcard
+  from icad_summary_2 a, customer_master c, pnd_reason x, debit_turnover_hist e, 
+       dw_sttm_ac_stat_change f
+  where a.cust_no = c.customer_no(+) and a.cust_ac_no = x.cust_ac_no(+) and a.cust_ac_no = e.dr_account(+)
+  and a.cust_ac_no = f.cust_ac_no(+)
+  and e.narration not like '%WITHHOLDING TAX%' and e.narration not like '%REVALUATION'
+  and e.narration not like '%ELECTRONIC MONEY TRANSFER%' and e.narration not like '%MOM & POP LENDING WITH ZERO%'
+  and e.value_dt > a.pnd_date and e.value_dt between '01oct2022' and '27oct2022'
+  and a.pnd = 'Y') a
+  
+  left join
+  
+  (select aa.* from  
+  (select customer_no,message,user_message,inst_date
+  from
+    (SELECT a.*,row_number() over (partition by a.customer_no order by inst_date desc) rnk
+from  FCUBSLIVE.cstm_inst_detail@fcubs_dr a)
+where rnk =1)aa
+inner join
+FCUBSLIVE.cstm_inst_master@fcubs_dr b
+on(aa.customer_no = b.customer_no)
+where upper(message)  like '%MEMO%'
+and  record_stat='O'
+union
+select customer_no,message,user_message,inst_date
+from  FCUBSLIVE.cstm_inst_detail@fcubs_dr
+where upper(message)  like '%MEMO%') d
+on (nvl(a.cust_ac_no,a.cust_no)  = d.customer_no)

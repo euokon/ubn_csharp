@@ -1,0 +1,77 @@
+ 
+(select  w.*, y.line_mat, case when substr(w.cust_mis_2,1,3) not in ('COR') then z.sbu_region 
+                             else 'CORPORATE' end sbu_region,
+                      x. linecode,
+                      x.clean_up_cycle,
+                      nvl(x.monthly_covenant,0)monthly_covenant,
+                      x.quaterly_covenant,
+                      x.yearly_covenant,
+                      case when nvl(x.monthly_covenant,0) <= 0 then  (w.credit_turnover - w.facility_amount)
+                      else (w.credit_turnover -nvl(x.monthly_covenant,0))end variance,
+                      (w.credit_turnover/w.facility_amount)  turnover_percent
+                               FROM (
+
+select w.* from 
+(select rowid, x.*,row_number() over(partition by cust_ac_no order by max_balance asc) rnk
+ from
+ (select *  from crm_monthly_turnovernw where period =:period
+ and facility_type in ('OVERDRAFT','SHORT TERM CORPORATE SECURED','STOCKING TERM FINANCE BACKEND INT')
+and classification NOT in ('DOUB','LOSS')
+and facility_amount >0 
+ )x
+ ) w
+ where rnk = 1
+) w
+left join (select  distinct xx.cust_ac_no,
+                      yy.cust_no,
+                      aa.line_start_date start_date,
+                      aa.line_expiry_date end_date,
+                      aa.limit_amount facility_amount,
+                      yy.ccy,
+                      yy.account_derived_status,
+                      case
+                        when yy.acy_curr_balance >= 0 then
+                         0
+                        when yy.acy_curr_balance < 0 then
+                         abs(yy.acy_curr_balance)
+                      end facility_balance,
+                      aa.udf_value_1 linecode,
+                      aa.udf_value_2 clean_up_cycle,
+                      aa.udf_value_3,
+                                          case
+                        when aa.line_start_date >= '01-mar-2016' and
+                             (substr(aa.udf_value_3, 1, 1) = '0' or
+                             aa.udf_value_3 = 'NA') then
+                         aa.limit_amount
+                        when aa.udf_value_3 = 'NA' then
+                         0
+                        when substr(aa.udf_value_3, 1, 1) = '0' then
+                         0
+                        when aa.udf_value_3 = '15M' then
+                         15000000
+                        else
+                         to_number(aa.udf_value_3)
+                      end monthly_covenant,
+                      aa.udf_value_4 quaterly_covenant,
+                      aa.udf_value_5 yearly_covenant
+        from getm_facility@fcubs_dr              aa
+        inner join getm_liab@fcubs_dr    bb
+        on (bb.id = aa.liab_id)
+        inner join  sttm_cust_account_linkages@fcubs_dr xx
+        on (xx.linked_ref_no = aa.line_code || aa.line_serial and  xx.customer_no = bb.liab_no)
+        inner join dw_cust_account                      yy
+        on ( xx.cust_ac_no = yy.cust_ac_no)
+        where aa.line_expiry_date >
+             (select prev_working_day
+                from sttm_dates@fcubs_dr
+               where branch_code = '000')
+         and (aa.udf_value_3 is not null or aa.udf_value_4 is not null or
+             aa.udf_value_5 is not null)) x
+             
+on (w.account_number = x.cust_ac_no)
+
+left join crm_clr_report_new y
+on (w.account_number = y.account_number and y.line_mat is not null)
+left join crm_branch_region z
+on (w.branch_code = z.branch_code)             
+)

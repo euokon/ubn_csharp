@@ -1,0 +1,45 @@
+create table agn_txn_tbl as
+select * from
+(SELECT dr_acct_no,
+trans_date,
+resp_code,
+'FAILED' resp_mesg,
+userid,
+channel,
+cast(trns_amt as VARCHAR2(2000 CHAR)) trans_amt,
+fee,
+ben_paybill_actno,
+ben_cust_name,
+trans_type,
+dr_narration,
+'' reversal_flag,
+ ''status,
+ ''txn_ref_no
+from  dw_wallet_agncore_txntbl 
+where resp_code <> '00'
+
+UNION ALL
+
+select 
+
+dr_account,
+TXN_DTTM,
+'00'resp_code,
+'SUCCESSFUL'resp_mesg,
+user_id,
+channel,
+txn_amt,
+fee_amt,
+cr_account,
+ 'NULL' ben_cust_name,
+SERVICECODE trans_type,
+dr_narration,
+reversal_flag,
+status,
+txn_ref_no
+from dw_wallet_fin_txn
+where reversal_flag = 'N'
+and substr(txn_ref_no, 1, 1) <> 'R')
+where trunc(trans_date)>='01jul2022';
+ commit;
+

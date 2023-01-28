@@ -1,0 +1,17 @@
+select * from
+(select trans_date, description, sum(no_of_txn) from
+(select trunc(a.trans_date) trans_date, b.description, count(distinct a.trans_amt) no_of_txn 
+from agn_txn_tbl a, agn_service_tbl b
+where a.trans_type = b.servicecode(+) 
+and b.description in ('Cash withdrawal',
+                       'Cash Deposit',
+                       'Cash withdrawal card other bank',
+                       'Cashwithdrawal Card Union bank',
+                       'Fund Transfer Other Bank',
+                       'Fund Transfer Own Bank',
+                       'Fundtransfer Card Otherbank',
+                       'Fundtransfer Card Union bank')
+group by trans_date, b.description
+order by no_of_txn)
+group by trans_date, description 
+order by sum(no_of_txn))

@@ -1,0 +1,12 @@
+select account_no,
+       account_name,
+       customer_id,
+       branch_code,
+       branch_name,
+       card_type,
+       issue_date,
+       account_type,
+       card_program
+  from all_account_cards
+ where issue_date between '01dec2022' and '16jan2023'
+   and branch_code in ('329', '487', '416', '427', '425', '335')

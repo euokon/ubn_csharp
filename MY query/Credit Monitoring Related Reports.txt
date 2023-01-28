@@ -1,0 +1,145 @@
+1.Cash Collateral Report>>>DWH<<<<
+/*select a.contract_ref_no,
+             a.product,
+             e.product_description,
+             a.counterparty cust_no,
+             f.customer_name1 customer_name,
+             a.booking_date,
+             a.value_date,
+             a.maturity_date,
+             a.currency,
+             decode(a.currency, 'NGN', null, a.amount) fcy_amount,
+             a.lcy_amount,
+             nvl(a.main_comp_rate,
+                 (select rate
+                   from cftb_contract_interest@fcubs_dr z
+                   where contract_reference_no = a.contract_ref_no
+                     and event_sequence_no = a.event_seq_no
+                     and component = a.main_comp
+                     and value_date =(select max(value_date)
+                            from cftb_contract_interest@fcubs_dr
+                           where z.contract_reference_no =
+                                 contract_reference_no))) int_rate,
+             decode(a.product,'SGBD', nvl(f.customer_name1, f.full_name),
+                    replace(replace(a.remarks, '![CDATA[', null), ']]', null)) remarks,
+             \*             a.remarks,
+             *\
+             a.tenor,
+             a.dflt_settle_ac_branch,
+             h.branch_name           settle_branch,
+             a.branch,
+             a.dflt_settle_ac,
+             c.cust_mis_4,
+             d.code_desc             rm_name,
+             a.product_type,
+             b.contract_status,
+             g.maker_id              maker,
+             g.checker_id            checker
+   from ldtb_contract_master@fcubs_dr           a,
+             cstb_contract@fcubs_dr           b,
+         mitm_customer_default@fcubs_dr   c,
+             gltm_mis_code@fcubs_dr           d,
+             cstm_product@fcubs_dr            e,
+              dw_sttm_customer           f,
+             cstb_contract_event_log@fcubs_dr g,
+              dw_sttm_branch             h
+       where a.contract_ref_no = b.contract_ref_no
+         and a.contract_ref_no = g.contract_ref_no
+         and a.version_no = b.latest_version_no
+         and a.counterparty = c.customer(+)
+         and c.cust_mis_4 = d.mis_code(+)
+         and a.product = e.product_code
+         and a.counterparty = f.customer_no
+         and dflt_settle_ac_branch = h.branch_code
+         and d.mis_class(+) = 'RM_CODE'
+         and a.module = 'LD' --in_module or in_module = 'All')
+         and g.event_code = 'BOOK'
+         and (b.contract_status = :in_status or :in_status = 'All')
+         and a.product in ('FCCD', 'FCCG', 'FCCE', 'LCCD')
+         and trunc(maturity_date) between :StartDate and :EndDate*/
+         select distinct a.contract_ref_no,
+             a.product,
+             e.product_description,
+             a.counterparty cust_no,
+             f.customer_name,
+             a.booking_date,
+             a.value_date,
+             a.maturity_date,
+             a.currency,
+             decode(a.currency, 'NGN', null, a.amount) fcy_amount,
+             a.lcy_amount,
+             nvl(a.main_comp_rate,
+                 (select rate
+                   from cftb_contract_interest@fcubs_dr z
+                   where contract_reference_no = a.contract_ref_no
+                     and event_sequence_no = a.event_seq_no
+                     and component = a.main_comp
+                     and value_date =(select max(value_date)
+                            from cftb_contract_interest@fcubs_dr
+                           where z.contract_reference_no =
+                                 contract_reference_no))) int_rate,
+ (select rate
+                       from fcubslive.LDTB_CONTRACT_ICCF_CALC@fcubs_dr z
+                      where z.contract_ref_no = a.contract_ref_no
+                        and z.component = 'DP_FIXINT'
+                        and z.start_date = (select max(start_date) from fcubslive.LDTB_CONTRACT_ICCF_CALC@fcubs_dr y where y.contract_ref_no = a.contract_ref_no)) running_rate  ,   
+             decode(a.product,'SGBD', f.customer_name,
+                    replace(replace(a.remarks, '![CDATA[', null), ']]', null)) remarks,
+             /*             a.remarks,
+             */
+             a.tenor,
+             a.dflt_settle_ac_branch,
+             h.branch_name           settle_branch,
+             h.region  settle_region,
+             a.branch,
+             a.dflt_settle_ac,
+             c.cust_mis_4,
+             d.code_desc             rm_name,
+             a.product_type,
+             f.bus_sgt,
+             f.sub_bus_sgt,
+             b.contract_status,
+             g.maker_id              maker,
+             g.checker_id            checker,
+             k.field_val_4 OBLIG_NAME ,k.field_val_5 OBLIG_ACCOUNT ,
+k.field_val_6 OBLIC_CUSTID
+   from ldtb_contract_master@fcubs_dr           a,
+             cstb_contract@fcubs_dr           b,
+         mitm_customer_default@fcubs_dr   c,
+             gltm_mis_code@fcubs_dr           d,
+             cstm_product@fcubs_dr            e,
+              stg_uat.customer_master          f,
+             cstb_contract_event_log@fcubs_dr g,
+             stg_uat.branch_master             h,
+           (select * from  (select contract_ref_no, version_no,field_val_5,
+         field_val_4,field_val_6,row_number() over(partition by contract_ref_no order by version_no desc) rnk
+          from  cstm_contract_userdef_fields@fcubs_dr )where rnk = 1)k
+       where a.contract_ref_no = b.contract_ref_no
+         and a.contract_ref_no = g.contract_ref_no
+         and a.contract_ref_no = k.contract_ref_no (+)
+         and a.version_no = b.latest_version_no
+         and a.counterparty = c.customer(+)
+         and c.cust_mis_4 = d.mis_code(+)
+         and a.product = e.product_code
+         and a.counterparty = f.customer_no
+         and dflt_settle_ac_branch = h.branch_code
+         and d.mis_class(+) = 'RM_CODE'
+         and a.module = 'LD' --in_module or in_module = 'All')
+         and g.event_code = 'BOOK'
+         and (b.contract_status = :in_status or :in_status = 'All')
+         and a.product in ('FCCD', 'FCCG', 'FCCE', 'LCCD')
+         and trunc(maturity_date) between :StartDate and :EndDate
+
+
+2.Credit Monitoring by RM>>>>DWH<<<pkg_ssrs_REPORTS_2.PRC_CREDIT_DASH
+
+
+3.Credit Monitoring ED View>>>>DWH<<<PKG_SSRS_REPORTS_2.PRC_CLR_GHVIEW
+
+
+4.Credit Monitoring Group Head View>>>DWH<<<<pkg_ssRS_REPORTS_2.prc_clr_ghview
+
+
+5.Credit Monitoring Regional Head View>>>DWH<<<<PKG_SSRS_REPORTS_2.PRC_CLR_GHVIEW
+
+6.Maturity ladder>>>DWH<<<

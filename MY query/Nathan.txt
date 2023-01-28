@@ -1,0 +1,64 @@
+
+with t1 as 
+ (select dormancy_date,
+         branch_code,
+         to_char(dormancy_date, 'yyyy-mm') period
+    from account_master),
+t2 as
+ (select br_code, br_name, area, region from new_branch_map)
+select t1.DORMANCY_DATE,
+       t2.br_code,
+       t2.area,
+       t2.br_name,
+       t2.region,
+       SUBSTR(period, 1, 4) || SUBSTR(period, 6, 7) PERIOD
+  from t1
+  join t2
+    on t2.br_code = t1.branch_code;
+-----------------------------------------------------------------------------------------------
+
+select * from
+(select br_code, br_name, area, region, business_segment, period, total from
+(select br_code, br_name, area, region, business_segment, period, count(cust_ac_no) total from
+(Select b.br_code,
+       b.br_name,
+       b.area,
+       b.region,
+       a.business_segment,
+       a.cust_ac_no,
+       to_char(a.dormancy_date, 'yyyymm') period
+  from account_master a, new_branch_map b
+ where a.branch_code = b.br_code(+)
+   and active_status = 'INACTIVE'
+   and record_stat = 'O'
+   and business_segment in ('RETAIL', 'SME', 'COMMERCIAL', 'CORPORATE'))
+   group by br_code, br_name, area, region, business_segment, period)
+   where period <= '202211')
+   
+   pivot(sum(total) as total for period in ('202012' dec20, '202101' jan21, '202102' feb21, '202103' mar21, 
+   '202104' apr21, '202105' may21, '202106' jun21, '202107' jul21, '202108' aug21, '202109' sep21, 
+   '202110' oct21, '202111' nov21, '202112' dec21, '202201' jan22, '202202' feb22, '202203' mar22, 
+   '202204' apr22, '202205' may22, '202206' jun22, '202207' jul22, '202208' aug22, '202209' sep22, 
+   '202210' oct22, '202211' nov22))
+   --------------------------------------------------------------------------------
+
+select br_code, br_name, area, region, business_segment, period, sum(total) from
+(select br_code, br_name, area, region, business_segment, period, count(cust_ac_no) total from
+(Select b.br_code,
+       b.br_name,
+       b.area,
+       b.region,
+       a.business_segment,
+       a.cust_ac_no,
+       to_char(a.dormancy_date, 'yyyymm') period
+  from account_master a, new_branch_map b
+ where a.branch_code = b.br_code(+)
+   and active_status = 'ACTIVE'
+   and record_stat = 'O'
+   and business_segment in ('RETAIL', 'SME', 'COMMERCIAL', 'CORPORATE'))
+   group by br_code, br_name, area, region, business_segment, period)
+   where period <= '202012'
+   group by br_code, br_name, area, region, business_segment, period
+
+-----------------------------------------------------------------------------
+floor((months_between(sysdate,a.date_of_birth_incorp)/12)) 

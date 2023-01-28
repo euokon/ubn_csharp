@@ -1,0 +1,2 @@
+  create table tempo (cust_no varchar(20) not null);
+commit;

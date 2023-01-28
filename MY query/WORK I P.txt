@@ -1,0 +1,8 @@
+select * from
+(select a.agent_id,
+       b.trns_amt,
+       b.fee,
+       trunc(b.trans_date) trans_date
+from
+agn_data_tbl a, agn_txn_tbl b
+where a.agent_id = b.userid(+))

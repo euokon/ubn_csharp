@@ -1,0 +1,34 @@
+select * from (select description, weeks, count(userid)
+          from (select a.*,
+                       to_char(to_date(a.trans_date, 'dd/mm/yyyy'), 'W') week_of_the_month,
+                       'Week' || ' ' ||
+                       to_char(to_date(a.trans_date, 'dd/mm/yyyy'), 'W') Weeks,
+                       c.description
+                  from agn_txn_tbl a,
+                       dw_agn_data_tbl   b,
+                       agn_service_tbl   c
+                 where a.userid = b.agent_id(+)
+                   and a.trans_type = c.servicecode(+)
+                   and trans_date between '01sep2022' and '30sep2022')
+         group by description, weeks
+         order by count(userid))
+ where weeks = 'Week 2'
+   and description in ('Cash withdrawal',
+                       'Cash Deposit',
+                       'Cash withdrawal card other bank',
+                       'Cashwithdrawal Card Union bank',
+                       'Fund Transfer Other Bank',
+                       'Fund Transfer Own Bank',
+                       'Fundtransfer Card Otherbank',
+                       'Fundtransfer Card Union bank')
+
+
+
+
+
+
+
+
+
+
+

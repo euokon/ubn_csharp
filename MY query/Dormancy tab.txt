@@ -1,0 +1,55 @@
+create table dormancy_tbl as
+select a.branch_code,
+       a.cust_no,
+       a.cust_ac_no,
+       a.ac_desc,
+       decode(UPPER(a.customer_type),
+              'C',
+              'CORPORATE',
+              'I',
+              'INDIVIDUAL',
+              'OTHERS') Customer_type,
+       a.acc_class_desc,
+       a.ac_open_date,
+       a.ac_stat_dormant,
+       a.lcy_curr_balance,
+       a.last_txn_date,
+       a.business_segment,
+       a.dormancy_date,
+       floor((months_between(sysdate, a.dormancy_date) / 12) * 365) dormancy_days,
+       d.br_name,
+       d.area,
+       d.region,
+       e.rm_code,
+       e.rm_name,
+       e.rm_segment,
+       f.status_change_date,
+       case
+         when status_change_date is null then
+          'No Reactivation'
+         else
+          'Reactivated'
+       end Reactivation_status
+  from account_master a,
+       dw_acct_active_status c,
+       new_branch_map d,
+       rm_map e,
+       (select cust_ac_no, status_change_date, from_dormant
+          from (select cust_ac_no,
+                       from_dormant,
+                       trunc(status_change_date) status_change_date,
+                       ROW_NUMBER() over(Partition BY cust_ac_no ORDER BY status_change_date DESC) AS row_number
+                  from dw_sttm_ac_stat_change
+                 where from_dormant = 'Y'
+                   and dormant = 'N'
+                   and record_stat = 'O') a
+         where row_number = 1) f
+ where a.cust_ac_no = c.cust_ac_no(+)
+   and a.branch_code = d.br_code(+)
+   and a.rm_code = e.rm_code(+)
+   and a.cust_ac_no = f.cust_ac_no(+)
+   and a.record_stat = 'O'
+   and a.ac_stat_dormant = 'Y';  
+commit;
+
+

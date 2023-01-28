@@ -1,0 +1,88 @@
+----PND
+
+select cust_id,
+       customer_name,
+       tsp_account_no,
+       tsp_balance,
+       account_class,
+       account_officer,
+       maker_id,
+       checker_id,
+       status_change_date,
+       msg
+  from (select distinct (a.cust_no) cust_id,
+                        a.ac_desc Customer_name,
+                        d.cust_ac_no tsp_account_no,
+                        a.lcy_curr_balance tsp_balance,
+                        a.account_class,
+                        c.rm_name account_officer,
+                        d.maker_id,
+                        d.checker_id,
+                        d.status_change_date,
+                        e.msg,
+                        decode(d.from_ac_stat_no_dr, 'Y', 'YES', 'N', 'NO') Former_PND_Status,
+                        decode(d.ac_stat_no_dr, 'Y', 'YES', 'N', 'NO') Current_PND_Status
+          from stg_uat.account_master@linkcognos a,
+               stg_uat.rm_map@linkcognos         c,
+               sttm_ac_stat_change@fcubslink     d,
+               stg_uat.pnd_reason@linkcognos     e
+         where a.rm_code = c.rm_code(+)
+           and a.cust_ac_no = d.cust_ac_no(+)
+           and a.cust_ac_no = e.cust_ac_no(+)
+           and a.account_class in ('SA_014',
+                                   'SA_019',
+                                   'SA_017',
+                                   'SA_018',
+                                   'SA_016',
+                                   'SA_020',
+                                   'SA_015',
+                                   'SA_022',
+                                   'SA_023',
+                                   'SA_024',
+                                   'SA_025', 'SA_036', 'SA_035'
+                                   'SA_021')
+           and a.record_stat = 'O'
+           and a.tsp = 'Y'
+           and a.lcy_curr_balance >= 10000
+           and trunc(d.status_change_date) = trunc(sysdate))
+ where Former_PND_Status = 'YES'
+   and Current_PND_Status = 'NO'
+
+-----------------------------------------------------------------------------------------
+---LIEN
+
+select distinct (a.cust_no) cust_id,
+                a.ac_desc Customer_name,
+                a.cust_ac_no tsp_account_no,
+                a.lcy_curr_balance tsp_balance,
+                a.account_class,
+                c.rm_name account_officer,
+                a.maker_id,
+                a.checker_id,
+                d.remarks,
+                d.effective_date
+  from stg_uat.account_master@linkcognos a,
+       stg_uat.rm_map@linkcognos c,
+       catm_amount_blocks@fcubslink d
+ where a.rm_code = c.rm_code(+)
+   and a.cust_ac_no = d.account(+)
+   and a.account_class in ('SA_014',
+                           'SA_019',
+                           'SA_017',
+                           'SA_018',
+                           'SA_016',
+                           'SA_020',
+                           'SA_015',
+                           'SA_022',
+                           'SA_023',
+                           'SA_024',
+                           'SA_025',
+                           'SA_036',
+                           'SA_021',
+                           'SA_035')
+   and a.record_stat = 'O'
+   and d.record_stat = 'C'
+   and d.remarks != 'Stamp Duty Charges'
+   and a.tsp = 'Y'
+   and a.lcy_curr_balance >= 10000
+   and trunc(effective_date) = trunc(sysdate)

@@ -1,0 +1,20 @@
+create table agn_data_tbl as
+select a.user_id agent_id,
+       a.first_name agent_name,
+       a.customer_code, 
+       a.date_created creation_date,
+       a.w_prd_code product_code,
+       a.w_prd_desc product_desc,
+       a.account_no,
+       a.acc_branch, 
+       a.status,
+       a.ref_num,
+       a.rm_code,
+       c.branch_code,
+       c.address,
+       c.rl_lga LGA,
+       c.r_state state
+from dw_agent_customer_master a,
+     dw_agent_contact_info c
+ where a.user_id = c.mobile_number(+);
+ commit;

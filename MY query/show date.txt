@@ -1,0 +1,12 @@
+select *
+  from (select userid, weeks, sum(trns_amt), sum(fee), trans_date
+          from (select a.*,
+                       to_char(to_date(a.trans_date, 'dd/mm/yyyy'), 'W') week_of_the_month,
+                       'Week' || ' ' ||
+                       to_char(to_date(a.trans_date, 'dd/mm/yyyy'), 'W') Weeks
+                  from agn_txn_tbl a, dw_agn_data_tbl b
+                 where a.userid = b.agent_id(+)
+                   and trans_date between '01sep2022' and '30sep2022')
+         group by userid, weeks, trans_date
+         order by sum(trns_amt), sum(fee))
+ where weeks = 'Week 1'

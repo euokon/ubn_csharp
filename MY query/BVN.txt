@@ -1,0 +1,18 @@
+select * from
+(select distinct b.op_region region,b.zone,a.branch_code,br_name branch_name,cust_ac_no account_number,
+        ac_desc account_name,
+        a.ccy,lcy_curr_balance,case when ccy <> 'NGN' then acy_curr_balance else null end fcy_balance,
+        total_blocked_amt hold_amount,decode(pnd,'Y','YES','NO') pnd_staus,category,
+        a.active_status status,
+       ac_open_date,account_class,acc_class_desc,decode(c.customer_type,'I','Individual','C','Corporate') customer_type,c.customer_tier,c.customer_category
+     from account_master  a, new_branch_map b, datagov.drv_customer_master c
+where a.cust_no = c.customer_no     
+  and a.branch_code = b.br_code
+  and a.acct_banking_status = 'CUSTOMER'
+  --and upper(customer_type) = 'I'
+  and substr(account_class,1,2) <> 'CT'
+  and a.record_stat = 'O'
+  and ac_desc  is not null
+  and c.bvn is null
+  and c.country = 'NG'
+  )

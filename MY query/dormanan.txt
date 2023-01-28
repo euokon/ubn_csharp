@@ -1,0 +1,34 @@
+select a.*,xx.sub_bus_sgt,
+       case when xx.customer_type = 'I' then 'Individual'
+         when xx.customer_type = 'C' then 'Corporate' else 'Other' end customer_types,
+       b.rm_name,
+       c.br_name,
+       d.status_change_date,
+       case
+         when d.status_change_date is null then
+          'No Reactivation'
+         else
+          'Reactivated'
+       end Reactivation_status
+ from account_master a,
+       rm_map b,
+       new_branch_map c,
+       customer_master xx,
+       (select cust_ac_no, status_change_date
+          from (select cust_ac_no,
+                       trunc(status_change_date) status_change_date,
+                       ROW_NUMBER() over(Partition BY cust_ac_no ORDER BY status_change_date DESC) AS row_number
+                  from sttm_ac_stat_change@fcubs_dr
+                 where from_dormant = 'Y'
+                   and dormant = 'N'
+                   and record_stat = 'O') a
+         where row_number = 1) d
+ where a.category = 'CURRENT'
+   and a.rm_code = b.rm_code(+)
+   and a.branch_code = c.br_code
+   and a.cust_ac_no = d.cust_ac_no(+)
+   and a.cust_no = xx.customer_no
+   and a.acct_banking_status = 'CUSTOMER'
+   and a.record_stat = 'O'
+   
+

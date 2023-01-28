@@ -1,0 +1,66 @@
+/*Kindly send the below details of SME customers.
+
+Customers who have purchased BTA in the last 24 months.
+Customers who have completed the Form M within the last 24 months.
+Customers who have paid for marine insurance in the past 24 months.*/
+
+select a.trn_dt, ---BTA
+       b.cust_ac_no, 
+       a.narration, 
+       c.sub_bus_sgt, 
+       b.rm_code,
+       --c.mobile_num,
+       c.customer_email,
+       b.ac_desc,
+       b.branch_code,
+       c.branch_name,
+       b.business_segment  
+  from stg_fx_txn_monitoring a, account_master b, 
+  datagov.customer_master c
+ where a.debited_account = b.cust_ac_no(+)
+   and b.cust_no = c.customer_no(+)
+   and b.business_segment = 'SME'
+   and narration like '%BTA%'
+   and trn_dt <= '01dec2022'
+--and trn_dt between :P_start and :P_end
+
+
+select a.id, --FORM M
+       a.application_number,
+       a.form_number,
+       a.created_at,
+       c.cust_ac_no,
+       a.status,
+       b.sub_bus_sgt,
+       c.rm_code,
+       --c.mobile_num,
+       b.customer_email,
+       c.ac_desc,
+       c.branch_code,
+       b.branch_name,
+       c.business_segment
+  from stg_uat.dw_Form_M a, datagov.customer_master b, account_master c
+ where a.applicant_rc_number = b.rc(+)
+   and b.customer_no = c.cust_no(+)
+   and c.business_segment = 'SME'
+   and status = 'Registered'
+   and created_at between '01dec2020' and '01dec2022'
+
+select a.trn_dt, --Marine
+       a.trn_ref_no,
+       c.cust_ac_no, 
+       a.narration, 
+       b.sub_bus_sgt, 
+       c.rm_code,
+       --c.mobile_num,
+       b.customer_email,
+       c.ac_desc,
+       c.branch_code,
+       b.branch_name,
+       c.business_segment 
+       from actb_history a, datagov.customer_master b, account_master c
+ where a.ac_branch = b.local_branch(+)
+   and c.cust_no = b.customer_no(+)
+   and trn_dt between '01dec2020' and '01dec2022'
+   and a.narration like '%marine insurance%'
+   and c.business_segment = 'SME'

@@ -1,0 +1,45 @@
+select  cust_no,
+               cust_ac_no,
+               ac_desc,
+               account_class,
+               ac_open_date,
+               branch_code,
+               --a.record_stat,
+               b.CUST_ADDRESS,
+               b.ADDRESS_STATE,
+               b.COVERAGE_AREA_CODE,
+               b.DATE_CREATED,
+               b.REQ_STATUS,
+               b.VENDOR_ID,
+                vendor_name,
+                VERIFICATN_STATUS,
+               b.VER_STATUS,
+               b.VERIFIED_BY,
+               b.DATE_VERIFIED,
+               b.LNDMRK
+from account_master a,
+(select            
+   A.ID,
+               A.SOURCE_TYPE,
+               A.AC_DESC AS CUSTOMER_NAME,
+               A.AC_NUMBER,
+               A.ADDRESS AS CUST_ADDRESS,
+               A.COVERAGE_AREA AS ADDRESS_STATE,
+               A.COVERAGE_AREA_CODE,
+               A.CREATED_DATE AS DATE_CREATED,
+               A.REQ_STATUS,
+               A.VENDOR_ID,
+               d.name vendor_name,
+               DECODE(A.VER_STATUS,'P','Pass','F','Fail','I','Incomplete Details','N','Not Applicable','Unknown') AS VERIFICATN_STATUS,
+               A.VER_STATUS,
+               A.VERIFIED_BY,
+               A.VERIFIED_DATE AS DATE_VERIFIED,
+               A.LANDMARK AS LNDMRK
+ from apps.av_requests@fcubs_dr a,
+      APPS.AV_VENDORS@fcubs_dr d
+where A.VENDOR_ID = D.ID(+) ) b,
+ (select * from customer_master 
+where cif_creation_date between '01jan2022' and '07dec2022') c
+ where a.cust_no = b.AC_NUMBER
+ and a.cust_no = c.customer_no
+ and b.req_status = 'X'

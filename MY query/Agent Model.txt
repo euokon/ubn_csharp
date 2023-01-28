@@ -1,0 +1,5 @@
+1. agn_data_tbl --- Brian
+2. agn_txn_tbl --- Brian
+3. agn_service_tbl---Mofi
+4. agn_prod_tbl ----- Samson
+5. agn_pos_tbl ---- Kehinde

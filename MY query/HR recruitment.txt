@@ -1,0 +1,8 @@
+The data is now attached and as discussed; we would like you to help build a dashboard to show the following information:
+
+•	Details of Candidates who have resumed
+•	Candidates whose CBN documents have been cleared
+•	Those awaiting CBN documents from Vendors
+•	Those logged/awaiting clearance
+•	Declined Offer
+•	Disqualified

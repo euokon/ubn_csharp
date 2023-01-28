@@ -1,0 +1,23 @@
+PL VALIDATION done 1st of the month
+
+*****Execute; ins_pl_validation (procedure) on both FINANCE & STG schema
+
+      BEGIN
+	ins_pl_validation;
+        END;
+
+**** download the report to excel on BR 
+
+**** Rename sheets; sglmnth, income(interest), Expense, Comm & fees
+
+**** sglmnth; ensure the variance is all 0.00
+
+****income; ensure the MTD & AMT diff is not 0.00 else color code red(PRIORITY)
+	
+	when the untagged is >40% color code blue
+where amt is blank MTD most be zero else yellow code
+
+
+**** EXPENSE; SAME RULES
+
+**** COMM & FEES

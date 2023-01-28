@@ -1,0 +1,36 @@
+---- Reactivation
+
+select count(cust_ac_no) from(select a.ac_desc,
+               a.cust_ac_no,        
+                b.status_change_date,
+               case
+                 when status_change_date is null then
+                  'No Reactivation'
+                 else
+                  'Reactivated'
+               end Reactivation_status
+          from account_master a,
+               (select cust_ac_no, status_change_date, from_dormant
+                  from (select cust_ac_no,
+                               from_dormant,
+                               trunc(status_change_date) status_change_date,
+                               ROW_NUMBER() over(Partition BY cust_ac_no ORDER BY status_change_date DESC) AS row_number
+                          from dw_sttm_ac_stat_change
+                         where from_dormant = 'Y'
+                           and dormant = 'N'
+                           and record_stat = 'O') a
+                 where row_number = 1) b
+         where a.cust_ac_no = b.cust_ac_no(+)
+         and a.record_stat = 'O'
+         and a.ac_stat_dormant = 'Y')
+         where reactivation_status = 'Reactivated'
+         and status_change_date between '01dec2022' and '31dec2022'
+
+
+-------------------------------------------------------------------------------
+---Dormancy
+
+select count(cust_ac_no) from account_master
+where record_stat = 'O'
+and ac_stat_dormant = 'Y'
+and dormancy_date between '01dec2022' and '31dec2022'

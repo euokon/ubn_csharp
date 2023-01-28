@@ -1,0 +1,28 @@
+select a.branch_code, 
+       a.cust_ac_no,
+       a.ac_desc,
+       a.cust_no,
+       c.bvn,
+       a.ac_open_date,
+       a.record_stat,
+       a.ccy,
+       a.pnd,
+       a.active_status,
+       a.account_class,
+       a.acc_class_desc description,
+       a.acct_channel
+ from account_master a, datagov.drv_customer_master  c
+  where a.cust_no = c.customer_no
+  and a.record_stat = 'O'
+  and a.ac_open_date between '01jan2022' and '21nov2022'
+  and exists 
+(select b.* from
+(select bvn, count(*) 
+from datagov.drv_customer_master
+where record_stat = 'O'
+  and cust_banking_status = 'CUSTOMER'
+  and length(bvn) = 11 and bvn not like '%0000000%'
+group by bvn
+having count(distinct customer_no) >1) b where c.bvn = b.bvn )
+order by c.bvn 
+

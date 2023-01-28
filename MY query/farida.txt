@@ -1,0 +1,15 @@
+
+  select distinct a.cust_ac_no       account_no,
+       a.ac_desc         account_name,
+       a.cust_no,
+       c.customer_email,
+       c.mobile_num,
+       a.branch_code
+  from account_master a, actb_history b, customer_master c
+  where a.cust_ac_no = b.ac_no(+)
+  and a.cust_no = c.customer_no(+)
+  and a.customer_type = 'C'
+  and b.trn_dt between '01nov2022' and '30nov2022'
+  and a.record_stat = 'O'
+  and a.business_segment in ('SME', 'COMMERCIAL')
+  

@@ -1,0 +1,11 @@
+SELECT br_code, PERIOD, SUM(total_deposit) FROM (
+select b.br_code, a.PERIOD, 
+       case
+         when dep_cat in ('LC_MARGIN_LCY', 'LC_MARGIN_FCY', 'OTHLIAB') then 
+           sum(a.cr_bal_lcy) end as total_deposit         
+  from dep_tbl_me_HIST a, new_branch_map b
+ where a.branch_code = b.br_code(+)
+   and PERIOD BETWEEN '202012' AND '202211'
+ group by b.br_code, dep_cat, a.PERIOD
+ order by sum(a.cr_bal_lcy))
+ group by br_code, PERIOD

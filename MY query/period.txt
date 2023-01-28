@@ -1,0 +1,3 @@
+with t1 as 
+(select dormancy_date, to_char(dormancy_date, 'yyyy-mm') period from account_master)
+select DORMANCY_DATE, SUBSTR(period, 1,4) || SUBSTR(period, 6,7) PERIOD from t1;

@@ -1,0 +1,6 @@
+TRAINING DAY 2
+
+PROCEDURES;
+- prevent SQL injection
+
+CREATE OR REPLACE PRC

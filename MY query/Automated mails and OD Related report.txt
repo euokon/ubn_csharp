@@ -1,0 +1,4477 @@
+Automated mails and OD Related report
+1. Collections Monitoring>>>DWH>>>PKG_CREDIT_MONITORING.PRC_COVENANT_MONITORING
+PACKAGE BODY pkg_credit_monitoring is
+
+  procedure prc_excess_overlimit_od(in_rmcode  in varchar2,
+                                    in_rhemail in varchar2,
+                                    in_chemail in varchar2,
+                                    in_biz     in varchar2,
+                                    p_result   out sys_refcursor) is
+  begin
+    open p_result for
+      select a.branch_code,
+             a.product,
+             a.product_name,
+             a.branch_name,
+             a.customer_name,
+             a.settlement_account,
+             a.line od_limit,
+             a.line_start_date,
+             a.line_expiry_date,
+             a.total_balance,
+             (a.total_balance - (a.line + (case
+               when a.tod_limit is not null and a.tod_end > a.reference_date then
+                a.tod_limit
+               else
+                0
+             end))) excess_over_limit,
+             a.overline_od_since,
+             a.classification facility_status,
+             a.minor_biz_segment,
+             a.major_biz_segment,
+             upper(a.relationship_manager) rm_name
+        from crm_clr_report_new a, rm_tbl b
+       where a.rm_code = b.staffno
+         and sources <> 'CL'
+         and (a.rm_code = in_rmcode or in_rmcode = 'ALL')
+         and (b.clusterhead_email = in_chemail or in_chemail = 'ALL')
+         and (b.regionhead_email = in_rhemail or in_rhemail = 'ALL')
+         and (b.segment = in_biz or in_biz = 'ALL')
+         and (a.total_balance - (a.line + (case
+               when a.tod_limit is not null and a.tod_end > a.reference_date then
+                a.tod_limit
+               else
+                0
+             end))) > 0
+         and a.product not in
+             ('CA_101', 'CA_033', 'CA_001', 'CA_044', 'CA_100')
+         and a.line_expiry_date >= trunc(sysdate);
+  end;
+
+  procedure prc_covenant_monitoring(in_rmcode  in varchar2,
+                                    in_rhemail in varchar2,
+                                    in_chemail in varchar2,
+                                    in_biz     in varchar2,
+                                    ret        out sys_refcursor) is
+  begin
+    open ret for
+      select aa.customer_name,
+             aa.cust_no,
+             aa.ccy,
+             aa.facility_amount,
+             aa.facility_balance,
+             aa.monthly_covenant,
+             round(aa.credit_turnover, 4) credit_turnover,
+             round(aa.curr_ratio, 4) curr_ratio,
+             round(aa.prorated_turnover, 4) prorated_turnover,
+             aa.rm_code,
+             aa.rm_name,
+             aa.rm_email,
+             aa.regionhead_name,
+             aa.rh_email,
+             aa.clusterhead_name,
+             aa.ch_email,
+             aa.biz_segment
+        from (select *
+                from crm_turnover_covenant a
+               where (a.rm_code = in_rmcode or in_rmcode = 'ALL')
+                 and (a.ch_email = in_chemail or in_chemail = 'ALL')
+                 and (a.rh_email = in_rhemail or in_rhemail = 'ALL')
+                 and (a.biz_segment = in_biz or in_biz = 'ALL')
+                 and a.curr_ratio < 0.5) aa;
+  end;
+
+  procedure prc_pdo_details(in_rmcode  in varchar2,
+                            in_rhemail in varchar2,
+                            in_chemail in varchar2,
+                            in_biz     in varchar2,
+                            p_result   out sys_refcursor) is
+  begin
+    open p_result for
+      select a.branch_name,
+             a.account_number,
+             a.customer_name,
+             a.settlement_account,
+             a.limit_acy amount_financed,
+             a.total_balance,
+             a.acy_total_amt_pastdue total_amt_pastdue,
+             a.dpd days_past_due,
+             a.classification,
+             UPPER(a.relationship_manager) relationship_manager,
+             a.major_biz_segment
+        from crm_clr_report_new a, rm_tbl b, ubn_employee_details c
+       where a.rm_code = b.staffno
+         and b.staffno = c.emp_number
+         and a.product <> 'MEM2'
+         and a.sources = 'CL'
+         and a.dpd > 0
+         and (a.rm_code = in_rmcode or in_rmcode = 'ALL')
+         and (b.clusterhead_email = in_chemail or in_chemail = 'ALL')
+         and (b.regionhead_email = in_rhemail or in_rhemail = 'ALL')
+         and (upper(b.segment) = in_biz or in_biz = 'ALL');
+  end;
+
+  procedure prc_expired_od(in_rmcode  in varchar2,
+                           in_rhemail in varchar2,
+                           in_chemail in varchar2,
+                           in_biz     in varchar2,
+                           p_result   out sys_refcursor) is
+  
+  begin
+    open p_result for
+      select a.branch_name,
+             a.account_number facility_reference,
+             a.customer_name,
+             a.settlement_account,
+             a.product_name,
+             a.limit_acy amount_financed,
+             a.limit_value_date start_date,
+             a.limit_expiry_date expiry_date,
+             a.dpd no_of_days_expired,
+             a.dr_bal_lcy,
+             a.total_balance,
+             a.classification,
+             UPPER(a.relationship_manager) relationship_manager,
+             a.major_biz_segment
+        from crm_clr_report_new a, rm_tbl b, ubn_employee_details c
+       where a.rm_code = b.staffno
+         and b.staffno = c.emp_number
+         and a.sources <> 'CL'
+         and a.product not in
+             ('CA_101', 'CA_033', 'CA_001', 'CA_044', 'CA_100')
+         and a.limit_acy > 0
+         and a.limit_expiry_date < trunc(sysdate)
+         and (a.rm_code = in_rmcode or in_rmcode = 'ALL')
+         and (b.clusterhead_email = in_chemail or in_chemail = 'ALL')
+         and (b.regionhead_email = in_rhemail or in_rhemail = 'ALL')
+         and (upper(b.segment) = in_biz or in_biz = 'ALL');
+  end;
+
+  procedure prc_expiring_od(in_rmcode  in varchar2,
+                            in_rhemail in varchar2,
+                            in_chemail in varchar2,
+                            in_biz     in varchar2,
+                            p_result   out sys_refcursor) is
+  
+  begin
+   /* update crm_clr_report_new
+       set line_mat = ''
+     where length(line_mat) not in (10);
+    commit;
+  execute immediate 'truncate table expiring_days';
+  insert into expiring_days
+    select a.branch_name,
+             a.customer_name,
+             a.account_number,
+             a.ccy,
+             a.limit_acy,
+             a.limit_value_date start_date,
+             a.limit_expiry_date expiry_date,
+             to_date(a.line_mat, 'YYYY-MM-DD') line_mat,
+             a.classification,
+             UPPER(a.relationship_manager) relationship_manager,
+             a.tenor_bucket,
+             a.major_biz_segment,
+             b.segment,
+             a.rm_code,
+             b.regionhead_email,
+             b.clusterhead_email,
+            to_date(a.line_mat, 'YYYY-MM-DD') - trunc(sysdate) exp_days
+        from crm_clr_report_new a, rm_tbl b, ubn_employee_details c
+       where a.rm_code = b.staffno
+         and b.staffno = c.emp_number
+         and a.sources <> 'CL'
+         and nvl(a.limit_acy, 0) != 0
+         and length(a.line_mat(+)) = 10
+         and a.product not in
+             ('CA_101', 'CA_033', 'CA_001', 'CA_044', 'CA_100');
+             
+             commit;
+           */     open p_result for
+             select * from expiring_days 
+             where exp_days between 0 and 90
+         and (rm_code = in_rmcode or in_rmcode = 'ALL')
+         and (clusterhead_email = in_chemail or in_chemail = 'ALL')
+         and (regionhead_email = in_rhemail or in_rhemail = 'ALL')
+         and (upper(segment) = in_biz or in_biz = 'ALL');
+  end;
+  procedure prc_expiring_tranche(in_rmcode  in varchar2,
+                                 in_rhemail in varchar2,
+                                 in_chemail in varchar2,
+                                 in_biz     in varchar2,
+                                 p_result   out sys_refcursor) is
+  
+  begin
+  /*  update crm_clr_report_new
+       set line_mat = ''
+     where length(line_mat) not in (10);
+    commit;
+    
+ execute immediate 'truncate table expiring_ranche';
+  insert into  expiring_ranche 
+ select a.branch_name,
+             a.customer_name,
+             a.account_number,
+             a.ccy,
+             a.limit_acy,
+             a.limit_value_date start_date,
+             a.limit_expiry_date expiry_date,
+             to_date(a.line_mat, 'YYYY-MM-DD') line_mat,
+             a.classification,
+             UPPER(a.relationship_manager) relationship_manager,
+             a.tenor_bucket,
+             a.major_biz_segment,
+            b.segment,
+             a.rm_code,
+             b.regionhead_email,
+             b.clusterhead_email,
+              case when a.limit_expiry_date < TO_date(a.line_mat, 'RRRR-MM-DD') then 1 else 
+                0 end ranche_var,
+                a.limit_expiry_date - trunc(sysdate) ranche_days
+        from crm_clr_report_new a, rm_tbl b, ubn_employee_details c
+       where a.rm_code = b.staffno
+         and b.staffno = c.emp_number
+         and a.sources <> 'CL'
+         and nvl(a.limit_acy, 0) != 0
+         and a.product not in
+             ('CA_101', 'CA_033', 'CA_001', 'CA_044', 'CA_100');
+             commit;
+       */      
+    open p_result for
+     select * from expiring_ranche where ranche_days between 0 and 20
+             ---------and ranche_var  =1
+         and (rm_code = in_rmcode or in_rmcode = 'ALL')
+         and (clusterhead_email = in_chemail or in_chemail = 'ALL')
+         and (regionhead_email = in_rhemail or in_rhemail = 'ALL')
+         and (upper(segment) = in_biz or in_biz = 'ALL');
+  end;
+
+  procedure prc_maturing_loans(in_rmcode  in varchar2,
+                               in_rhemail in varchar2,
+                               in_chemail in varchar2,
+                               in_biz     in varchar2,
+                               p_result   out sys_refcursor) is
+  
+  begin
+    open p_result for
+    
+      select a.branch_name,
+             a.customer_name,
+             a.settlement_account,
+             a.account_number loan_number,
+             a.alt_ac_no alt_loan_number,
+             a.product_name,
+             a.next_principal_instmnt_date pric_due_date,
+             a.next_principal_instmnt_due princ_due,
+             a.next_interest_instmnt_date int_due_date,
+             a.next_interest_instmnt_due int_due,
+             a.limit_acy loan_amount,
+             a.limit_expiry_date maturity_date,
+             least((a.next_principal_instmnt_date - trunc(sysdate)),
+                   (a.next_principal_instmnt_date - trunc(sysdate))) days_to_due_date,
+             (a.intarrs + a.principal_arrears + a.other_interest_arrears) total_arrears,
+             a.total_balance loan_balance,
+             a.classification,
+             a.rm_code,
+             UPPER(a.relationship_manager) rm_name,
+             a.major_biz_segment segment
+        from crm_clr_report_new a, rm_tbl b, ubn_employee_details c
+       where a.rm_code = b.staffno
+         and b.staffno = c.emp_number
+         and a.product <> 'MEM2'
+         and sources = 'CL'
+         and least((a.next_principal_instmnt_date - trunc(sysdate)),
+                   (a.next_principal_instmnt_date - trunc(sysdate))) between 1 and 14
+         and a.typo <> 'STF'
+         and (a.rm_code = in_rmcode or in_rmcode = 'ALL')
+         and (b.clusterhead_email = in_chemail or in_chemail = 'ALL')
+         and (b.regionhead_email = in_rhemail or in_rhemail = 'ALL')
+         and (upper(b.segment) = in_biz or in_biz = 'ALL');
+  end;
+  procedure prc_consequence_mngmt(ret out sys_refcursor) is
+  begin
+    open ret for
+      select aa.RM,
+             aa.account_number,
+             aa.account_name,
+             decode(aa.classification,
+                    'NORM',
+                    'PERFORMING',
+                    'WTL1',
+                    'WATCHLIST1',
+                    'WTL2',
+                    'WATCHLIST2',
+                    'WTL3',
+                    'WATCHLIST3',
+                    aa.classification) classification,
+             aa.exception_type,
+             aa.sbu
+        from (select UPPER(a.relationship_manager) RM,
+                     a.account_number,
+                     a.customer_name Account_name,
+                     a.classification,
+                     'PDO' exception_type,
+                     a.major_biz_segment SBU
+                from crm_clr_report_new a, rm_tbl b, ubn_employee_details c
+               where a.rm_code = b.staffno
+                 and b.staffno = c.emp_number
+                 and a.product <> 'MEM2'
+                 and a.sources = 'CL'
+                 and a.dpd > 60
+                 and a.classification in
+                     ('PERFORMING', 'WATCHLIST1', 'WATCHLIST2', 'WATCHLIST3')
+              UNION
+              select upper(a.relationship_manager) rm_name,
+                     a.settlement_account,
+                     a.customer_name,
+                     a.classification,
+                     'EXCESS',
+                     a.minor_biz_segment || '-' || a.major_biz_segment SBU
+                from crm_clr_report_new a, rm_tbl b
+               where a.rm_code = b.staffno
+                 and sources <> 'CL'
+                 and (a.total_balance - (a.line + (case
+                       when a.tod_limit is not null and
+                            a.tod_end > a.reference_date then
+                        a.tod_limit
+                       else
+                        0
+                     end))) > 0
+                 and a.product not in
+                     ('CA_101', 'CA_033', 'CA_001', 'CA_044', 'CA_100')
+                 and (trunc(sysdate) - a.overline_od_since) > 30
+                 and a.limit_expiry_date > trunc(sysdate)
+                 and a.classification in
+                     ('PERFORMING', 'WATCHLIST1', 'WATCHLIST2', 'WATCHLIST3')
+              UNION
+              select UPPER(a.relationship_manager) relationship_manager,
+                     a.account_number,
+                     a.customer_name,
+                     a.classification,
+                     'EXPIRED',
+                     a.major_biz_segment
+                from crm_clr_report_new a, rm_tbl b, ubn_employee_details c
+               where a.rm_code = b.staffno
+                 and b.staffno = c.emp_number
+                 and a.sources <> 'CL'
+                 and a.product not in
+                     ('CA_101', 'CA_033', 'CA_001', 'CA_044', 'CA_100')
+                 and a.limit_acy > 0
+                 and a.limit_expiry_date < trunc(sysdate)
+                 and a.dpd > 30
+                 and a.classification in
+                     ('PERFORMING', 'WATCHLIST1', 'WATCHLIST2', 'WATCHLIST3')
+              UNION
+              select distinct x.rm_name,
+                              y.cust_ac_no,
+                              y.ac_desc,
+                              y.classification,
+                              'POOR COLLECTION',
+                              X.BIZ_SEGMENT
+                from crm_turnover_covenant x, crm_monthly_turnover y
+               WHERE x.cust_no = y.cust_no
+                 and x.rm_code = y.cust_mis_4
+                 and y.classification in ('NORM', 'WTL1', 'WTL2', 'WTL3')
+                 and cust_ac_no in
+                     (select cust_Ac_no
+                        from (select count(*), cust_Ac_no
+                                from (select distinct period, y.cust_ac_no
+                                        from crm_turnover_covenant x,
+                                             crm_monthly_turnover  y
+                                       WHERE x.cust_no = y.cust_no
+                                         and x.rm_code = y.cust_mis_4
+                                         and y.classification in
+                                             ('NORM', 'WTL1', 'WTL2', 'WTL3')
+                                         and (period in
+                                             (select to_char(add_months(prev_working_day,
+                                                                         -1),
+                                                              'rrrrmm')
+                                                 from sttm_dates@fcubs_dr
+                                                where branch_code = '000') or
+                                             period in
+                                             (select to_char(add_months(prev_working_day,
+                                                                         -2),
+                                                              'rrrrmm')
+                                                 from sttm_dates@fcubs_dr
+                                                where branch_code = '000') or
+                                             period in
+                                             (select to_char(add_months(prev_working_day,
+                                                                         -3),
+                                                              'rrrrmm')
+                                                 from sttm_dates@fcubs_dr
+                                                where branch_code = '000'))
+                                         and curr_ratio < 0.5
+                                         and (y.credit_turnover /
+                                             x.monthly_covenant) * 100 < 30)
+                              having count(cust_ac_no) = 3
+                               group by cust_ac_no))) aa;
+  end prc_consequence_mngmt;
+  procedure prc_star_workitems(in_date   date,
+                               in_enddt  date,
+                               Business  varchar2,
+                               Product   varchar2,
+                               accountNM varchar2,
+                               ret       out sys_refcursor) is
+  begin
+    open ret for
+      SELECT *
+        FROM (SELECT Concat('http://172.16.10.210/WorkItems/View?workItemID=',
+                            w.ID) as Url,
+                     to_char(bpv.Name) BusinessProcess,
+                     to_char(w.Name) WorkItemID,
+                     to_char(bu.Name) BusinessUnit,
+                     w.DateCreated,
+                     to_char(w.EMPLOYERNAME) EMPLOYER_NAME,
+                     to_char(WorkflowStatus) workflowstatus,
+                     LoanAmount,
+                     to_char(AccountNumber) accountnumber,
+                     upper(to_char(AccountName)) accountname,
+                     to_char(CustomerID) CustomerID,
+                     to_char(w.productcode) productcode,
+                     to_char(stp.name) name,
+                     to_char(usr.EmailAddress) as IntroducingOfficerEmail,
+                     to_char(usr.FirstName || ' ' || usr.Surname) as IntroducingOfficerName,
+                     em.emp_number,
+                     w.loaninterestrate,
+                     w.loantenor
+                FROM STR_WORKITEMS_NEW          w,
+                     STR_BUSINESSUNITS          bu,
+                     STR_BUSINESSPROCESSVERSION bpv,
+                     STR_PRODUCTS               stp,
+                     str_users                  usr,
+                     ubn_employee_details       em
+               where w.BusinessUnitID = bu.ID
+                 and w.BusinessProcessVersionID = bpv.ID
+                 and w.introducerofficerid = usr.id(+)
+                 and usr.emailaddress = em.email(+)
+                 and w.productcode = stp.code(+)
+                 and trunc(w.DateCreated) between in_date and in_enddt
+              union
+              SELECT Concat('https://creditflow-app2/WorkItems/Details/',
+                            w.ID) as Url,
+                     trim(w.businessprocessdisplayname) BusinessProcess,
+                     w.Name WorkItemID,
+                     bu.Name BusinessUnit,
+                     w.DateCreated,
+                     w.EMPLOYERNAME EMPLOYER_NAME,
+                     WorkflowStatus,
+                     LoanAmount,
+                     AccountNumber,
+                     upper(AccountName),
+                     CustomerID,
+                     TRIM(w.productcode),
+                     stp.name,
+                     usr.EmailAddress as IntroducingOfficerEmail,
+                     usr.FirstName || ' ' || usr.Surname as IntroducingOfficerName,
+                     em.emp_number,
+                     dec.SANNUALINTERESTRATE Approvedloaninterestrate,
+                     w.approvedloantenure
+                FROM star.str_workitems@star         w,
+                     star.STR_BUSINESSUNITS@star     bu,
+                     star.STR_PRODUCTS@star          stp,
+                     star.str_users@star             usr,
+                     star.STR_DE_DECISIONBLOCKS@star dec,
+                     ubn_employee_details            em
+               where w.BusinessUnitID = bu.ID
+                 and w.ID = dec.WORKITEMID(+)
+                 and w.introducerofficerid = usr.id(+)
+                 and usr.emailaddress = em.email(+)
+                 and w.productcode = stp.code(+)
+                 and trunc(w.DateCreated) between in_date and in_enddt) wv
+       where (BusinessProcess in (Business) OR Business in 'ALL')
+         and (productcode in (Product) or Product in 'ALL')
+         and (AccountName LIKE upper(accountNM) or accountNM in 'ALL');
+  
+  end prc_star_workitems;
+     
+  procedure prc_star_workitemsCntrl(in_date   date,
+                                    in_enddt  date,
+                                    Business  varchar2,
+                                    Product   varchar2,
+                                    accountNM varchar2,
+                                    ret       out sys_refcursor) is
+  begin
+    open ret for
+      SELECT *
+        FROM (SELECT Concat('http://172.16.10.210/WorkItems/View?workItemID=',
+                            w.ID) as Url,
+                     to_char(bpv.Name) BusinessProcess,
+                     to_char(w.Name) WorkItemID,
+                     to_char(bu.Name) BusinessUnit,
+                     w.DateCreated,
+                     w.datecompleted,
+                     to_char(w.EMPLOYERNAME) EMPLOYER_NAME,
+                     to_char(WorkflowStatus) workflowstatus,
+                     LoanAmount,
+                     to_char(AccountNumber) accountnumber,
+                     upper(to_char(AccountName)) accountname,
+                     to_char(CustomerID) CustomerID,
+                     to_char(w.productcode) productcode,
+                     to_char(stp.name) name,
+                     to_char(usr.EmailAddress) as IntroducingOfficerEmail,
+                     to_char(usr.FirstName || ' ' || usr.Surname) as IntroducingOfficerName,
+                     em.emp_number,
+                     w.loaninterestrate,
+                     w.loantenor
+                FROM STR_WORKITEMS_NEW          w,
+                     STR_BUSINESSUNITS          bu,
+                     STR_BUSINESSPROCESSVERSION bpv,
+                     STR_PRODUCTS               stp,
+                     str_users                  usr,
+                     ubn_employee_details       em
+               where w.BusinessUnitID = bu.ID
+                 and w.BusinessProcessVersionID = bpv.ID
+                 and w.introducerofficerid = usr.id(+)
+                 and usr.emailaddress = em.email(+)
+                 and w.productcode = stp.code(+)
+                 and to_char(WorkflowStatus) in
+                     ('Awaiting_RMCD_Review',
+                      'Awaiting_Retail_Treasury_Operations_Review',
+                      'Awaiting_CRMS_Maintenance')
+                 and trunc(w.datecreated) between in_date and in_enddt
+              union
+              SELECT Concat('https://creditflow-app2/WorkItems/Details/',
+                            w.ID) as Url,
+                     trim(w.businessprocessdisplayname) BusinessProcess,
+                     w.Name WorkItemID,
+                     bu.Name BusinessUnit,
+                     w.DateCreated,
+                     w.datecompleted,
+                     w.EMPLOYERNAME EMPLOYER_NAME,
+                     WorkflowStatus,
+                     LoanAmount,
+                     AccountNumber,
+                     upper(AccountName),
+                     CustomerID,
+                     TRIM(w.productcode),
+                     stp.name,
+                     usr.EmailAddress as IntroducingOfficerEmail,
+                     usr.FirstName || ' ' || usr.Surname as IntroducingOfficerName,
+                     em.emp_number,
+                     dec.SANNUALINTERESTRATE Approvedloaninterestrate,
+                     w.approvedloantenure
+                FROM star.str_workitems@star         w,
+                     star.STR_BUSINESSUNITS@star     bu,
+                     star.STR_PRODUCTS@star          stp,
+                     star.str_users@star             usr,
+                     star.STR_DE_DECISIONBLOCKS@star dec,
+                     ubn_employee_details            em
+               where w.BusinessUnitID = bu.ID
+                 and w.ID = dec.WORKITEMID(+)
+                 and w.introducerofficerid = usr.id(+)
+                 and usr.emailaddress = em.email(+)
+                 and w.productcode = stp.code(+)
+                 and WorkflowStatus in
+                     ('Awaiting_RMCD_Review',
+                      'Awaiting_Retail_Treasury_Operations_Review',
+                      'Awaiting_CRMS_Maintenance')
+                 and trunc(w.datecreated) between in_date and in_enddt) wv
+       where (BusinessProcess in (Business) OR Business in 'ALL')
+         and (productcode in (Product) or Product in 'ALL')
+         and (AccountName LIKE upper(accountNM) or accountNM in 'ALL');
+  
+  end prc_star_workitemsCntrl;
+  procedure prc_star_workitems_facility(in_date      date,
+                                        in_enddt     date,
+                                        facilitytype varchar2,
+                                        ret          out sys_refcursor) is
+  begin
+    open ret for
+      SELECT *
+        FROM (SELECT Concat('http://172.16.10.210/WorkItems/View?workItemID=',
+                            w.ID) as Url,
+                     to_char(bpv.Name) BusinessProcess,
+                     to_char(w.Name) WorkItemID,
+                     to_char(bu.Name) BusinessUnit,
+                     w.DateCreated,
+                     to_char(w.EMPLOYERNAME) EMPLOYER_NAME,
+                     to_char(WorkflowStatus) workflowstatus,
+                     LoanAmount,
+                     to_char(AccountNumber) accountnumber,
+                     upper(to_char(AccountName)) accountname,
+                     to_char(CustomerID) CustomerID,
+                     to_char(w.productcode) productcode,
+                     to_char(stp.name) name,
+                     to_char(usr.EmailAddress) as IntroducingOfficerEmail,
+                     to_char(usr.FirstName || ' ' || usr.Surname) as IntroducingOfficerName,
+                     em.emp_number,
+                     w.loaninterestrate,
+                     w.loantenor,
+                     wf.facilityname,
+                     wf.facilitytype,
+                     wf.facilitycurrency,
+                     wf.currentlimit,
+                     wf.exposureasatdate,
+                     wf.newincreaseordecrease,
+                     wf.proposedlimits,
+                     wf.approvedsanctionedamount,
+                     wf.siccode
+                FROM STR_WORKITEMS_NEW          w,
+                     STR_BUSINESSUNITS          bu,
+                     STR_BUSINESSPROCESSVERSION bpv,
+                     STR_PRODUCTS               stp,
+                     str_users                  usr,
+                     ubn_employee_details       em,
+                     str_workitemfacility       wf
+               where w.BusinessUnitID = bu.ID
+                 and w.BusinessProcessVersionID = bpv.ID
+                 and w.introducerofficerid = usr.id(+)
+                 and usr.emailaddress = em.email(+)
+                 and w.productcode = stp.code(+)
+                 and wf.workitemid = w.id(+)
+                 and trunc(w.DateCreated) between in_date and in_enddt
+              union
+              SELECT Concat('https://creditflow-app2/WorkItems/Details/',
+                            w.ID) as Url,
+                     trim(w.businessprocessdisplayname) BusinessProcess,
+                     w.Name WorkItemID,
+                     bu.Name BusinessUnit,
+                     w.DateCreated,
+                     w.EMPLOYERNAME EMPLOYER_NAME,
+                     WorkflowStatus,
+                     LoanAmount,
+                     AccountNumber,
+                     upper(AccountName),
+                     CustomerID,
+                     TRIM(w.productcode),
+                     stp.name,
+                     usr.EmailAddress as IntroducingOfficerEmail,
+                     usr.FirstName || ' ' || usr.Surname as IntroducingOfficerName,
+                     em.emp_number,
+                     dec.SANNUALINTERESTRATE Approvedloaninterestrate,
+                     w.approvedloantenure,
+                     wf.facilityname,
+                     wf.facilitytype,
+                     wf.facilitycurrency,
+                     wf.currentlimit,
+                     wf.exposureasatdate,
+                     wf.newincreaseordecrease,
+                     wf.proposedlimits,
+                     wf.approvedsanctionedamount,
+                     wf.siccode
+                FROM star.str_workitems@star         w,
+                     star.STR_BUSINESSUNITS@star     bu,
+                     star.STR_PRODUCTS@star          stp,
+                     star.str_users@star             usr,
+                     star.STR_DE_DECISIONBLOCKS@star dec,
+                     ubn_employee_details            em,
+                     star.str_workitem_fac_dtls@star wf
+               where w.BusinessUnitID = bu.ID
+                 and w.ID = dec.WORKITEMID(+)
+                 and w.introducerofficerid = usr.id(+)
+                 and usr.emailaddress = em.email(+)
+                 and w.productcode = stp.code(+)
+                 and wf.workitemid = w.id
+                 and trunc(w.DateCreated) between in_date and in_enddt) wv
+       where (facilitytype in (facilitytype) OR facilitytype in 'ALL');
+  end prc_star_workitems_facility;
+  
+  procedure prc_star_workitems_branch (in_date    date,
+                                       in_enddt   date,
+                                       in_branchcode varchar2,
+                                      ret        out sys_refcursor) is
+  begin
+    open ret for
+
+SELECT *
+ FROM (SELECT Concat('http://172.16.10.210/WorkItems/View?workItemID=',
+                            w.ID) as Url,
+                     to_char(bpv.Name) BusinessProcess,
+                     to_char(w.Name) WorkItemID,
+                     em.branch_code branchcode,
+                     em.branch_name,
+                     to_char(bu.Name) BusinessUnit,
+                     w.DateCreated,
+                     to_char(w.EMPLOYERNAME) EMPLOYER_NAME,
+                     to_char(WorkflowStatus) workflowstatus,
+                     LoanAmount,
+                     to_char(AccountNumber) accountnumber,
+                     upper(to_char(AccountName)) accountname,
+                     to_char(CustomerID) CustomerID,
+                     to_char(w.productcode) productcode,
+                     to_char(stp.name) name,
+                     to_char(usr.EmailAddress) as IntroducingOfficerEmail,
+                     to_char(usr.FirstName || ' ' || usr.Surname) as IntroducingOfficerName,
+                     em.emp_number,
+                     w.loaninterestrate,
+                     w.loantenor
+                FROM STR_WORKITEMS_NEW          w,
+                     STR_BUSINESSUNITS          bu,
+                     STR_BUSINESSPROCESSVERSION bpv,
+                     STR_PRODUCTS               stp,
+                     str_users                  usr,
+                     ubn_employee_details       em
+               where w.BusinessUnitID = bu.ID
+                 and w.BusinessProcessVersionID = bpv.ID
+                 and w.introducerofficerid = usr.id(+)
+                 and usr.emailaddress = em.email(+)
+                 and w.productcode = stp.code(+)
+                 and trunc(w.DateCreated) between in_date and in_enddt
+              union
+              SELECT Concat('https://creditflow-app2/WorkItems/Details/',
+                            w.ID) as Url,
+                     trim(w.businessprocessdisplayname) BusinessProcess,
+                     w.Name WorkItemID,
+                     em.branch_code branchcode,
+                     em.branch_name,
+                     bu.Name BusinessUnit,
+                     w.DateCreated,
+                     w.EMPLOYERNAME EMPLOYER_NAME,
+                     WorkflowStatus,
+                     LoanAmount,
+                     AccountNumber,
+                     upper(AccountName) accountname,
+                     CustomerID,
+                     TRIM(w.productcode) productcode,
+                     stp.name,
+                     usr.EmailAddress as IntroducingOfficerEmail,
+                     usr.FirstName || ' ' || usr.Surname as IntroducingOfficerName,
+                     em.emp_number,
+                     dec.SANNUALINTERESTRATE Approvedloaninterestrate,
+                     w.approvedloantenure
+                FROM star.str_workitems@star         w,
+                     star.STR_BUSINESSUNITS@star     bu,
+                     star.STR_PRODUCTS@star          stp,
+                     star.str_users@star             usr,
+                     star.STR_DE_DECISIONBLOCKS@star dec,
+                     ubn_employee_details            em
+               where w.BusinessUnitID = bu.ID
+                 and w.ID = dec.WORKITEMID(+)
+                 and w.introducerofficerid = usr.id(+)
+                 and usr.emailaddress = em.email(+)
+                 and w.productcode = stp.code(+)
+                 and trunc(w.DateCreated) between in_date and in_enddt
+                 ) wv
+       where (branchcode = in_branchcode or in_branchcode = 'ALL') ;
+       
+  end prc_star_workitems_branch;
+
+  procedure prc_bussinessprocess(in_date  date,
+                                 in_enddt date,
+                                 ret      out sys_refcursor) is
+  begin
+    open ret for
+      select distinct BusinessProcess
+        from (SELECT distinct to_char(trim(bpv.Name)) BusinessProcess
+                FROM STR_WORKITEMS_NEW          w,
+                     STR_BUSINESSUNITS          bu,
+                     STR_BUSINESSPROCESSVERSION bpv
+               where w.BusinessUnitID = bu.ID
+                 and w.BusinessProcessVersionID = bpv.ID
+                 and w.DateCreated between in_date and in_enddt
+              union all
+              select distinct trim(businessprocessdisplayname)
+                from star.str_workitems@star y
+               where y.DateCreated between in_date and in_enddt
+              union
+              select 'ALL'
+                FROM DUAL)
+       order by 1;
+  end prc_bussinessprocess;
+  
+  
+  procedure prc_facilitytype(in_date  date,
+                             in_enddt date,
+                             ret      out sys_refcursor) is
+  begin
+    open ret for
+      select distinct facilitytype
+        from (SELECT distinct wf.facilitytype
+                FROM STR_WORKITEMS_NEW w, str_workitemfacility wf
+               where w.id = wf.workitemid
+                 and trunc(w.DateCreated) between in_date and in_enddt
+              union all
+              select distinct wf.facilitytype
+                from star.str_workitems@star         y,
+                     star.str_workitem_fac_dtls@star wf
+               where y.id = wf.workitemid
+                 and trunc(y.DateCreated) between in_date and in_enddt
+              union
+              select 'ALL'
+                FROM DUAL)
+       order by 1;
+  end prc_facilitytype;
+  procedure prc_coverage_ratio is
+  begin
+  
+    execute immediate 'truncate table tmp_tot_exposure';
+    insert into tmp_tot_exposure
+      select customer_name, cust_no, sum(total_balance) tot_exposure
+        from crm_clr_report_new
+       where reference_date =
+             (select max(reference_date) from crm_clr_report_new)
+       group by customer_name, cust_no;
+    commit;
+  
+    execute immediate 'truncate table collateral_moni';
+  
+    insert into collateral_moni
+      select liab_id,
+             liab_no,
+             customer_name,
+             liab_branch,
+             branch_name,
+             cbn_code,
+             cbn_collateral_type,
+             m.category_id,
+             collateral_desc,
+             collateral_code,
+             charge_type,
+             collateral_description,
+             secured_type,
+             collateral_currency,
+             collateral_value,
+             limit_contribution,
+             haircut_percent,
+             m.collateral_type,
+             start_date,
+             end_date,
+             old_reval_date,
+             collateral_address,
+             state,
+             om_value,
+             fs_value,
+             ins_value,
+             s_rvalue,
+             valuer,
+             status,
+             asset_insured,
+             insurance_co,
+             val_st_date,
+             reval_date,
+             st_date,
+             expiry_date,
+             premium,
+             verified,
+             category_name,
+             share_percentage,
+             contract_ref_no,
+             contract_branch,
+             contract_contribution,
+             insurance_no,
+             insurance_name,
+             insurance_owner,
+             insurance_type,
+             ins_start_date,
+             ins_end_date,
+             insurance_amt,
+             premium_amt,
+             premium_end_date,
+             maker_id,
+             checker_id,
+             maker_dt_stamp,
+             checker_dt_stamp,
+             nvl(total_fs_value, 0) total_fs_value,
+             nvl(total_fs_value_cat, 0) total_fs_value_cat,
+             p.groupname
+        from (select distinct a.liab_id,
+                              lpad(a.liab_id, 9, '0') customer_no,
+                              c.liab_no,
+                              c.liab_name customer_name,
+                              c.liab_branch,
+                              e.branch_name,
+                              i.cbn_code,
+                              i.collateral_type cbn_collateral_type,
+                              a.category_id,
+                              (select description
+                                 from getm_coll_category@fcubs_dr
+                                where id = a.category_id) collateral_desc,
+                              a.collateral_code,
+                              a.charge_type,
+                              a.collateral_description,
+                              a.secured secured_type,
+                              a.collateral_currency,
+                              a.collateral_value,
+                              a.limit_contribution,
+                              a.haircut haircut_percent,
+                              a.collateral_type,
+                              a.start_date,
+                              a.end_date,
+                              a.reval_date old_reval_date,
+                              trim(a.udf_value_1) collateral_address,
+                              a.udf_value_2 state,
+                              a.udf_value_3 om_value,
+                              a.udf_value_4 fs_value,
+                              a.udf_value_10 ins_value,
+                              a.udf_value_5 s_rvalue,
+                              a.udf_value_6 valuer,
+                              a.udf_value_7 status,
+                              a.udf_value_9 asset_insured,
+                              a.udf_value_8 insurance_co,
+                              a.udf_value_15 val_st_date,
+                              a.udf_value_16 reval_date,
+                              a.udf_value_12 st_date,
+                              a.udf_value_13 expiry_date,
+                              a.udf_value_11 premium,
+                              a.udf_value_14 verified,
+                              d.description category_name,
+                              f.share_percentage,
+                              g.contract_ref_no,
+                              g.contract_branch,
+                              g.contract_contribution,
+                              h.insurance_no,
+                              h.insurance_name,
+                              h.insurance_owner,
+                              h.insurance_type,
+                              h.start_date ins_start_date,
+                              h.end_date ins_end_date,
+                              h.insurance_amt,
+                              h.premium_amt,
+                              h.premium_end_date,
+                              a.maker_id,
+                              a.checker_id,
+                              a.maker_dt_stamp,
+                              a.checker_dt_stamp
+                from fcubslive.getm_collat@fcubs_dr              a,
+                     fcubslive.cltb_account_master@fcubs_dr      b,
+                     getm_liab@fcubs_dr                          c,
+                     fcubslive.getm_coll_category@fcubs_dr       d,
+                     sttm_branch@fcubs_dr                        e,
+                     fcubslive.getm_collat_share@fcubs_dr        f,
+                     fcubslive.getm_collat_cont_contrib@fcubs_dr g,
+                     fcubslive.getm_coll_insurance@fcubs_dr      h,
+                     crm_cbn_collateral_codes                    i
+               where lpad(a.liab_id, 9, '0') = b.customer_id(+)
+                 and a.liab_id = c.id
+                 and a.liab_id = f.liab_id(+)
+                 and f.coll_id = g.coll_id(+)
+                 and a.id = h.collateral_id(+)
+                 and to_char(a.category_id) = i.fcubs_code(+)
+                 and a.auth_stat = 'A'
+                 and nvl(b.auth_stat, 'A') = 'A'
+                 and a.category_id = d.id(+)
+                 and a.record_stat = 'O'
+                 and c.auth_stat = 'A'
+                 and c.liab_branch = e.branch_code(+)
+                 and a.maker_id <> 'MIGUSER'
+                 and a.maker_id <> 'MIGFCCUSER') m,
+             
+             (select cust_id, sum(nvl(collateral_value, 0)) total_fs_value
+                from (select cust_id,
+                             category_id,
+                             collateral_value,
+                             row_number() over(partition by cust_id, collateral_code, collateral_value order by cust_id asc) rnk
+                        from collateral_dtls)
+               where rnk = 1
+               group by cust_id) n,
+             
+             (select cust_id,
+                     category_id,
+                     sum(nvl(collateral_value, 0)) total_fs_value_cat
+                from (select cust_id,
+                             category_id,
+                             collateral_value,
+                             row_number() over(partition by cust_id, collateral_code, collateral_value order by cust_id asc) rnk
+                        from collateral_dtls)
+               where rnk = 1
+               group by cust_id, category_id) o,
+             
+             (select distinct aa.cust_no, aa.groupname
+                from crm_corpsme_sector_map aa) p
+      
+       where trim(m.liab_no) = trim(n.cust_id(+))
+         and trim(m.liab_no) = trim(o.cust_id(+))
+         and trim(m.liab_no) = trim(p.cust_no(+))
+         and m.category_id = o.category_id(+);
+  
+    commit;
+    delete from collateral_moni
+     where rowid in ((select rowid
+                       from (select tt.liab_no,
+                                    tt.collateral_code,
+                                    tt.collateral_value,
+                                    rowid,
+                                    row_number() over(partition by tt.liab_no, tt.collateral_code, tt.collateral_value order by tt.collateral_code) rnk
+                               from collateral_moni tt) vv
+                      where rnk > 1));
+    commit;
+  
+    execute immediate 'truncate table tmp_tot_value ';
+    insert into tmp_tot_value
+      select liab_no, sum(collateral_value) tot_value, category_name
+        from collateral_moni
+       group by liab_no, category_name;
+    commit;
+  
+    /*  open ret for
+    select u.customer_name,
+           u.cust_no,
+           v.category_name,
+           u.tot_exposure,
+           nvl(v.tot_value, 1) tot_value,
+           case
+             when u.tot_exposure > 0 and v.tot_value > 0 then
+              round((u.tot_exposure / v.tot_value) * 100, 2)
+             else
+              1
+           END LTV,
+           case
+             when u.tot_exposure > 0 and v.tot_value > 0 then
+              round((v.tot_value / u.tot_exposure) * 100, 2)
+             else
+              1
+           END LTVCOVERAGE_RATIO
+      from tmp_tot_exposure u, tmp_tot_value v
+     where u.cust_no = v.liab_no(+);*/
+  end prc_coverage_ratio;
+  procedure prc_term_deposit_listing(ret out sys_refcursor) is
+  begin
+    open ret for
+      select m.contract_ref_no,
+             branch,
+             branch_name,
+             product_code,
+             currency,
+             amount,
+             lcy_amount,
+             dflt_settle_ac,
+             m.value_date,
+             m.maturity_date,
+             m.amount balance,
+             n.ac_no,
+             ac_desc,
+             product_description,
+             cust_no
+        from (select a.contract_ref_no,
+                     c.branch,
+                     branch_name,
+                     contract_ccy        currency,
+                     c.amount            amount,
+                     c.lcy_amount,
+                     a.product_code,
+                     c.dflt_settle_ac,
+                     c.value_date,
+                     c.maturity_date,
+                     ac_desc,
+                     product_description,
+                     o.cust_no
+                from fcubslive.cstb_contract@fcubs_dr        a,
+                     sttm_branch@fcubs_dr                    b,
+                     fcubslive.ldtb_contract_master@fcubs_dr c,
+                     sttm_cust_account@fcubs_dr              o,
+                     cstm_product@fcubs_dr                   d
+               where a.product_type in ('D')
+                 and a.contract_status in ('A')
+                 and a.branch = b.branch_code
+                 and a.contract_ref_no = c.contract_ref_no
+                 and a.latest_version_no = c.version_no
+                 and c.counterparty = o.cust_no
+                 and o.cust_ac_no = c.dflt_settle_ac
+                 and a.product_code = d.product_code) m,
+             term_dep_gl n
+       where m.contract_ref_no = n.trn_ref_no(+)
+         and n.ac_no not in ('250600002');
+  end prc_term_deposit_listing;
+
+  procedure prc_loans_with_no_dpd(p_loan_acct in varchar2,
+                                  ret         out sys_refcursor) is
+  begin
+    open ret for
+      select product,
+             product_name,
+             account_number,
+             tot_dpd,
+             limit_value_date,
+             limit_expiry_date,
+             tenor_month,
+             settlement_account,
+             interest_rate
+        from (select c.product,
+                     c.product_name,
+                     c.account_number,
+                     sum(c.dpd) tot_dpd,
+                     c.limit_value_date,
+                     c.limit_expiry_date,
+                     round((c.limit_expiry_date - c.limit_value_date) / 30) tenor_month,
+                     c.settlement_account,
+                     interest_rate,
+                     row_number() over(partition by account_number order by limit_expiry_date desc) rnk
+                from crm_clr_report_hist c
+               where product not in ('MEM2')
+                 and length(account_number) != 10
+               group by c.product,
+                        c.product_name,
+                        c.account_number,
+                        c.limit_value_date,
+                        c.limit_expiry_date,
+                        round((c.limit_expiry_date - c.limit_value_date) / 30),
+                        c.settlement_account,
+                        interest_rate) c
+       where rnk = 1
+         and c.limit_expiry_date >= trunc(sysdate) - 30
+         and c.limit_expiry_date <= trunc(sysdate)
+         and tot_dpd = 0
+         and settlement_account = p_loan_acct;
+  
+  end;
+  procedure prc_loans_details(p_settl_acct in varchar2,
+                              ret          out sys_refcursor) is
+  begin
+    open ret for
+      select c.branch_code,
+             c.branch_name,
+             c.account_number,
+             c.cust_no,
+             c.customer_name,
+             c.product,
+             c.product_name,
+             c.ccy,
+             c.limit_acy,
+             c.limit_value_date,
+             c.limit_expiry_date,
+             c.interest_rate,
+             c.settlement_account,
+             c.dat_last_cr_casa,
+             c.cr_bal_lcy,
+             c.dr_bal_lcy,
+             c.principal_balance_acy,
+             c.principal_balance_lcy,
+             c.intarrs,
+             c.other_interest_arrears,
+             c.principal_arrears,
+             c.total_balance,
+             c.acy_total_amt_pastdue,
+             c.lcy_total_amt_pastdue,
+             c.dpd,
+             c.repyt_frq,
+             c.next_interest_instmnt_date,
+             c.next_interest_instmnt_due,
+             c.next_principal_instmnt_date,
+             c.next_principal_instmnt_due,
+             c.provision_amount,
+             c.classification_mode,
+             c.classification,
+             c.status_since,
+             c.overdraft_since,
+             c.od_days_overdrawn,
+             c.overline_od_since,
+             c.reporting_gl,
+             c.tenor_bucket,
+             c.adj_facility_type,
+             c.sources,
+             c.mbr_type,
+             c.typo,
+             c.rm_code,
+             c.relationship_manager,
+             c.minor_biz_segment,
+             c.major_biz_segment,
+             c.cbn_classification,
+             c.bvn,
+             c.tin,
+             c.crms_reference,
+             c.limit_lcy,
+             c.star_reference,
+             round((c.limit_expiry_date - c.limit_value_date) / 30) tenor_month
+        from crm_clr_report_new c
+       where settlement_Account in (p_settl_acct);
+  end;
+
+end pkg_credit_monitoring;
+
+
+2.ExcessOverLimit>>>DWH>>>pkg_credit_monitoring.prc_excess_overlimit_od
+
+3.Expired OD Facilities>>>>DWH>>>>pkg_credit_monitoring.prc_expired_od
+
+4.Expiring Overdrafts Cycle Within 20 DayS>>>DWH>>>stg_uat.pkg_credit_monitoring.prc_expiring_tranche
+
+5.Expiring Overdrafts Line Within 90 Days>>>>DWH>>>PKG_CREDIT_MONITORING.PRC_EXPIRING_OD
+
+6.Maturing Obligations>>>DWH>>>pkg_credit_monitoring.prc_maturing_loans
+
+7.Newly Booked Overdraft Facilities - CMCM>>>>FINANCE>>>
+ select a.cust_no, a.cust_ac_no, a.ac_desc, a.account_class, /*a.ac_open_date,*/ a.bus_sgt, a.rm_code, a.branch_code,
+     b.od_type, b.linked_ref_no, b.line_start_date, 
+b.line_expiry_date, b.delink_date, b.status, b.limit_amount
+, b.line_start_date limit_start_date, b.line_expiry_date limit_expiry_date, (c.cr_bal_lcy-c.dr_bal_lcy) account_bal
+    from cust_tbl a
+    inner join 
+    (
+    select i.cust_ac_no, 'OVERDRAFT' od_type, i.linked_ref_no, i.line_start_date, i.line_expiry_date, i.delink_date, i.status, i.limit_amount
+    from od_master i
+    where i.line_start_date =  :v_start_date
+    union all
+    select j.acc, 'TOD' od_type, 'TOD' linked_ref_no, j.tod_limit_start_date, j.tod_limit_end_date, null delink_date, j.status, j.tod_limit
+    from tod_master_new j
+    where j.tod_limit_start_date = :v_start_date
+    ) b
+    on (a.cust_ac_no = b.cust_ac_no)
+    left join gltb_cust_accbreakup c
+    on a.cust_ac_no = c.cust_ac_no and a.branch_code = c.branch_code
+    where substr(a.bus_sgt,1,1) <> 'R'
+    
+    
+8. OD Limit Utilization Report 2>>>NO ACCESS
+
+9. OD Renewal Cycle>>>
+
+10. OD Renewal Cycle - Reference Date>>>DWH>>>pkg_ssrs_reports_1.prc_od_renewal_cycle_ref
+PACKAGE BODY "PKG_SSRS_REPORTS_1" is
+
+  procedure prc_dly_tnover_rpt(in_brncd     in varchar2,
+                             in_trndt     in date,
+                             in_threshold in number,
+                             in_rm_code   in varchar2,
+                             in_ABE_code  in varchar2,
+                             ret          out sys_refcursor) is
+begin
+  open ret for
+    select substr(b.trn_ref_no, 1, 3) trn_brncd,
+           c.branch_name trn_branch_name,
+           a.branch_code ac_brncd,
+           d.branch_name ac_branch_name,
+           f.description account_class,
+           a.cust_ac_no account_no,
+           a.ac_desc account_name,
+           b.stmt_dt,
+           b.trn_dt,
+           b.value_dt,
+           (select narration
+              from fcubslive.get_narration@fcubs_dr nn
+             where nn.trn_ref_no = b.trn_ref_no
+               and nn.ac_entry_sr_no = b.ac_entry_sr_no
+               and nn.trn_code = b.trn_code) narration,
+           decode(b.drcr_ind, 'D', lcy_amount, null) withdrawal,
+           decode(b.drcr_ind, 'C', lcy_amount, null) lodgement,
+           e.cust_mis_4 rm_code,
+           (select code_desc
+              from gltm_mis_code@fcubs_dr
+             where mis_class = 'RM_CODE'
+               and mis_code = e.cust_mis_4
+               and active = 'A') rm_name,
+           line_manager_number,
+           line_manager_name,
+           e.cust_mis_2 biz_seg,
+           (select code_desc
+              from gltm_mis_code@fcubs_dr
+             where mis_class = 'BIZ_SEG'
+               and mis_code = e.cust_mis_2
+               and active = 'A') biz_seg_name
+      from sttm_cust_account@fcubs_dr     a,
+           acvw_all_ac_entries@fcubs_dr   b,
+           sttm_branch@fcubs_dr           c,
+           sttm_branch@fcubs_dr           d,
+           mitm_customer_default@fcubs_dr e,
+           sttm_account_class@fcubs_dr    f,
+           ubn_employee_details           g
+     where a.cust_ac_no = b.ac_no
+       and substr(b.trn_ref_no, 1, 3) = c.branch_code
+       and a.branch_code = d.branch_code
+       and a.cust_no = e.customer(+)
+       and upper(e.cust_mis_4) = upper(g.emp_number(+))
+       and a.account_class = f.account_class
+       and b.lcy_amount >= in_threshold
+       and b.trn_dt = in_trndt
+       and a.auth_stat = 'A'
+       and (a.branch_code = in_brncd OR in_brncd = 'ALL')
+       and (upper(e.cust_mis_4) = upper(in_rm_code) or in_rm_code = 'ALL')
+       and (upper(g.line_manager_number) = upper(in_ABE_code) or
+           in_ABE_code = 'ALL')
+       and length(a.cust_ac_no) = 10;
+end prc_dly_tnover_rpt;
+
+  procedure prc_brn_list(ret out sys_refcursor) is
+  begin
+    open ret for
+      select 'ALL' branch_code, 'ALL BRANCHES' branch_name, 0 SN
+        from dual
+      union all
+      select branch_code,
+             branch_code || ' - ' || branch_name branch_name,
+             row_number() over(order by branch_code) sn
+        from sttm_branch@fcubs_dr
+       order by 3;
+  end prc_brn_list;
+
+  procedure prc_reg_zn_brn_list(ret out sys_refcursor) is
+  begin
+    open ret for
+      select distinct region, zone_name /*,
+                                                                                                                                                                                                                                                    branch_name || ' - ' || new_branch_code*/
+        from ubn_brn_region@fcubs_dr x
+       where x.zone_name not like '%ZONE%'
+         AND region not in
+             ('HEAD OFFICE', 'ABUJA', 'NORTH EAST', 'NORTH WEST')
+         and region not like '%1'
+         and region not like '%2'
+       order by 2;
+  
+  end prc_reg_zn_brn_list;
+
+  procedure prc_dly_tnover_rpt2(in_trndt     in date,
+                                in_threshold in number,
+                                ret          out sys_refcursor) is
+  begin
+    open ret for
+      select substr(b.trn_ref_no, 1, 3) trn_brncd,
+             c.branch_name trn_branch_name,
+             a.branch_code ac_brncd,
+             d.branch_name ac_branch_name,
+             f.description account_class,
+             a.cust_ac_no account_no,
+             a.ac_desc account_name,
+             b.stmt_dt,
+             b.trn_dt,
+             b.value_dt,
+             (select narration
+                from fcubslive.get_narration@fcubs_dr nn
+               where nn.trn_ref_no = b.trn_ref_no
+                 and nn.ac_entry_sr_no = b.ac_entry_sr_no
+                 and nn.trn_code = b.trn_code) narration,
+             decode(b.drcr_ind, 'D', lcy_amount, null) withdrawal,
+             decode(b.drcr_ind, 'C', lcy_amount, null) lodgement,
+             e.cust_mis_4 rm_code,
+             (select code_desc
+                from gltm_mis_code@fcubs_dr
+               where mis_class = 'RM_CODE'
+                 and mis_code = e.cust_mis_4
+                 and active = 'A') rm_name,
+             e.cust_mis_2 biz_seg,
+             (select code_desc
+                from gltm_mis_code@fcubs_dr
+               where mis_class = 'BIZ_SEG'
+                 and mis_code = e.cust_mis_2
+                 and active = 'A') biz_seg_name
+        from sttm_cust_account@fcubs_dr     a,
+             acvw_all_ac_entries@fcubs_dr   b,
+             sttm_branch@fcubs_dr           c,
+             sttm_branch@fcubs_dr           d,
+             mitm_customer_default@fcubs_dr e,
+             sttm_account_class@fcubs_dr    f
+       where a.cust_ac_no = b.ac_no
+         and substr(b.trn_ref_no, 1, 3) = c.branch_code
+         and a.branch_code = d.branch_code
+         and a.cust_no = e.customer(+)
+         and a.account_class = f.account_class
+         and b.lcy_amount >= in_threshold
+         and b.trn_dt = in_trndt
+         and a.auth_stat = 'A'
+         and length(a.cust_ac_no) = 10
+       order by b.trn_dt;
+  end prc_dly_tnover_rpt2;
+
+  procedure prc_overdraft_report(in_start_date in date,
+                                 in_end_date   in date,
+                                 ret           out sys_refcursor) is
+  begin
+    open ret for
+      select xx.branch_code,
+             xx.cust_ac_no casa_or_loan_no,
+             xx.customer_no,
+             nvl(gg.customer_name1, gg.full_name) customer_name,
+             bb.id,
+             aa.line_code link_ref_no,
+             aa.limit_amount,
+             aa.utilisation,
+             ff.acy_avl_bal,
+             ----fn_get_line_rate(ff.cust_ac_no) line_rate,
+             line_expiry_date,
+             aa.line_start_date,
+             (select sum(lcy_amount) sum_amt
+                from acvw_all_ac_entries@fcubs_dr
+               where ac_no = xx.cust_ac_no
+                 and trn_dt > = in_start_date
+                 and trn_dt < = in_end_date
+                 and module = 'IC'
+                 and substr(trn_ref_no, 4, 4) = 'CAFE'
+                 and amount_tag <> 'TAX'
+                 and cust_gl = 'A') sum_amt,
+             oo.cust_mis_4 rm_code
+        from getm_facility@fcubs_dr aa,
+             getm_liab@fcubs_dr bb,
+             sttm_cust_account_linkages@fcubs_dr xx,
+             sttm_cust_account@fcubs_dr ff,
+             sttm_customer@fcubs_dr gg,
+             (select customer, cust_mis_1, cust_mis_2, cust_mis_4
+                from mitm_customer_default@fcubs_dr a) oo
+       where xx.cust_ac_no = ff.cust_ac_no
+         and xx.customer_no = bb.liab_no
+         and bb.id = aa.liab_id
+         and ff.cust_no = gg.customer_no
+         and xx.linked_ref_no = aa.line_code || aa.line_serial
+         and aa.line_start_date > = in_start_date
+         and aa.line_start_date < = in_end_date
+         and xx.customer_no = oo.customer(+);
+  end prc_overdraft_report;
+
+  procedure prc_termloan_report(in_start_date in date,
+                                in_end_date   in date,
+                                ret           out sys_refcursor) is
+  begin
+    open ret for
+      select primary_applicant_name,
+             product_category,
+             amount_financed,
+             aa.account_number,
+             book_date,
+             maturity_date,
+             customer_id,
+             cust_mis_4             rm_code,
+             account_status,
+             ww.dr_prod_ac          casa /*,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           get_ld_fees(aa.account_number) fees*/
+        from fcubslive.cltb_account_master@fcubs_dr aa,
+             (select customer, cust_mis_1, cust_mis_2, cust_mis_4
+                from mitm_customer_default@fcubs_dr a) bb,
+             (select account_number, dr_prod_ac
+                from fcubslive.cltb_account_components@fcubs_dr
+               where component_name = 'PRINCIPAL') ww
+       where book_date >= in_start_date
+         and book_date <= in_end_date
+         and aa.customer_id = bb.customer(+)
+         and account_status = 'A'
+         and ww.account_number = aa.account_number;
+  end prc_termloan_report;
+
+  procedure prc_nfiu_report_new(in_start_date in date,
+                                in_end_date   in date,
+                                ret           out sys_refcursor) is
+  begin
+    open ret for
+      select *
+        from nfiu_reportable_trans_new2 aa
+       where aa.trn_dt between in_start_date and in_end_date;
+  end prc_nfiu_report_new;
+
+  procedure prc_casa_int_susp(in_start_date in date, /*in_end_date in date,*/
+                              ret           out sys_refcursor) is
+  
+    v_period varchar2(7) := to_char(in_start_date, 'yyyymm');
+  begin
+    open ret for
+      select * from rep_m_interest_susp where reference_month = v_period;
+  end prc_casa_int_susp;
+
+  procedure prc_td_int_susp( /*in_start_date in date,in_end_date in date,*/ret out sys_refcursor) is
+  begin
+    open ret for
+      select * from rep_m_int_suspense;
+  end prc_td_int_susp;
+
+  procedure prc_erp_gl_report_fin(in_startdate in date,
+                                  in_enddate   in date,
+                                  --in_glcode    in varchar2,
+                                  -- in_branch    in varchar2,
+                                  -- in_dept      in varchar2,
+                                  ret out sys_refcursor) is
+  begin
+    open ret for
+      select f.region,
+             f.zone_name,
+             c.segment2      branch_code,
+             c.segment3      cost_centre,
+             d.description   branch_or_dept_name,
+             c.segment4      gl_code,
+             e.description   gl_name,
+             a.period_name,
+             effective_date,
+             b.currency_code,
+             entered_cr,
+             entered_dr,
+             a.description   narration
+        from gl.gl_je_lines@oracle_erp          a,
+             gl.gl_je_headers@oracle_erp        b,
+             gl.gl_code_combinations@oracle_erp c,
+             apps.fnd_flex_values_vl@oracle_erp d,
+             apps.fnd_flex_values_vl@oracle_erp e,
+             fcubslive.ubn_brn_region@fcubs_dr  f
+       where a.je_header_id = b.je_header_id
+         and a.code_combination_id = c.code_combination_id
+         and c.segment3 = d.flex_value
+         and c.segment4 = e.flex_value
+         and c.segment2 = f.new_branch_code
+         and a.status = 'P'
+         and actual_flag = 'A'
+         and d.flex_value_set_id = '1014907'
+            -- and (c.segment2 = in_branch OR in_branch = 'ALL')
+            --and (c.segment3 = in_dept OR in_dept = 'ALL')
+         and c.segment4 in ('420700003',
+                            '420210001',
+                            '420700001',
+                            '420700004',
+                            '415300006',
+                            '415600013',
+                            '420700002')
+         and effective_date between in_startdate and in_enddate --parameter gl date
+         and je_source not in ('Conversion', '1')
+         and c.segment4 != '160500009';
+  end;
+
+  procedure prc_erp_gl_report(in_startdate in date,
+                              in_enddate   in date,
+                              in_glcode    in varchar2,
+                              in_branch    in varchar2,
+                              in_dept      in varchar2,
+                              ret          out sys_refcursor) is
+  begin
+    /*    if in_dept = 'ALL' and in_glcode = 'ALL' and in_branch != 'ALL' then
+      open ret for
+        select f.region,
+               f.zone_name,
+               c.segment2      branch_code,
+               c.segment3      cost_centre,
+               d.description   branch_or_dept_name,
+               c.segment4      gl_code,
+               e.description   gl_name,
+               a.period_name,
+               effective_date,
+               b.currency_code,
+               entered_cr,
+               entered_dr,
+               a.description   narration
+          from gl.gl_je_lines@oracle_erp          a,
+               gl.gl_je_headers@oracle_erp        b,
+               gl.gl_code_combinations@oracle_erp c,
+               apps.fnd_flex_values_vl@oracle_erp d,
+               apps.fnd_flex_values_vl@oracle_erp e,
+               fcubslive.ubn_brn_region@fcubs_dr  f
+         where a.je_header_id = b.je_header_id
+           and a.code_combination_id = c.code_combination_id
+           and c.segment3 = d.flex_value
+           and c.segment4 = e.flex_value
+           and c.segment2 = f.new_branch_code
+           and a.status = 'P'
+           and actual_flag = 'A'
+           and d.flex_value_set_id = '1014907'
+           and c.segment2 = in_branch
+           and effective_date between in_startdate and in_enddate --parameter gl date
+           and je_source not in ('Conversion', '1')
+           and c.segment4 != '160500009';
+    
+    elsif in_dept != 'ALL' and in_glcode = 'ALL' and in_branch = 'ALL' then
+      open ret for
+        select f.region,
+               c.segment2      branch_code,
+               c.segment3      cost_centre,
+               d.description   branch_or_dept_name,
+               c.segment4      gl_code,
+               e.description   gl_name,
+               a.period_name,
+               effective_date,
+               b.currency_code,
+               entered_cr,
+               entered_dr,
+               a.description   narration
+          from gl.gl_je_lines@oracle_erp          a,
+               gl.gl_je_headers@oracle_erp        b,
+               gl.gl_code_combinations@oracle_erp c,
+               apps.fnd_flex_values_vl@oracle_erp d,
+               apps.fnd_flex_values_vl@oracle_erp e,
+               apps.ebs_branch@oracle_erp         f
+         where a.je_header_id = b.je_header_id
+           and a.code_combination_id = c.code_combination_id
+           and c.segment3 = d.flex_value
+           and c.segment4 = e.flex_value
+           and c.segment2 = f.ebs_code(+)
+           and a.status = 'P'
+           and actual_flag = 'A'
+           and d.flex_value_set_id = '1014907'
+           and c.segment3 = in_dept
+              --and upper(d.description) like '%HUMAN%' ---parameter dept description
+           and effective_date between in_startdate and in_enddate --parameter gl date
+           and je_source not in ('Conversion', '1')
+           and c.segment4 != '160500009';
+    
+    elsif in_glcode != 'ALL' and in_dept != 'ALL' and in_branch = 'ALL' then
+      open ret for
+        select f.region,
+               c.segment2      branch_code,
+               c.segment3      cost_centre,
+               d.description   branch_or_dept_name,
+               c.segment4      gl_code,
+               e.description   gl_name,
+               a.period_name,
+               effective_date,
+               b.currency_code,
+               entered_cr,
+               entered_dr,
+               a.description   narration
+          from gl.gl_je_lines@oracle_erp          a,
+               gl.gl_je_headers@oracle_erp        b,
+               gl.gl_code_combinations@oracle_erp c,
+               apps.fnd_flex_values_vl@oracle_erp d,
+               apps.fnd_flex_values_vl@oracle_erp e,
+               apps.ebs_branch@oracle_erp         f
+         where a.je_header_id = b.je_header_id
+           and a.code_combination_id = c.code_combination_id
+           and c.segment3 = d.flex_value
+           and c.segment4 = e.flex_value
+           and c.segment2 = f.ebs_code(+)
+           and a.status = 'P'
+           and actual_flag = 'A'
+           and d.flex_value_set_id = '1014907'
+           and c.segment3 = in_dept
+           and c.segment4 = in_glcode
+           and effective_date between in_startdate and in_enddate --parameter gl date
+           and je_source not in ('Conversion', '1')
+           and c.segment4 != '160500009';
+    
+    elsif in_glcode != 'ALL' and in_dept = 'ALL' and in_branch != 'ALL' then
+      open ret for
+        select f.region,
+               c.segment2      branch_code,
+               c.segment3      cost_centre,
+               d.description   branch_or_dept_name,
+               c.segment4      gl_code,
+               e.description   gl_name,
+               a.period_name,
+               effective_date,
+               b.currency_code,
+               entered_cr,
+               entered_dr,
+               a.description   narration
+          from gl.gl_je_lines@oracle_erp          a,
+               gl.gl_je_headers@oracle_erp        b,
+               gl.gl_code_combinations@oracle_erp c,
+               apps.fnd_flex_values_vl@oracle_erp d,
+               apps.fnd_flex_values_vl@oracle_erp e,
+               apps.ebs_branch@oracle_erp         f
+         where a.je_header_id = b.je_header_id
+           and a.code_combination_id = c.code_combination_id
+           and c.segment3 = d.flex_value
+           and c.segment4 = e.flex_value
+           and c.segment2 = f.ebs_code(+)
+           and a.status = 'P'
+           and actual_flag = 'A'
+           and d.flex_value_set_id = '1014907'
+           and c.segment2 = in_branch
+           and c.segment4 = in_glcode
+           and effective_date between in_startdate and in_enddate --parameter gl date
+           and je_source not in ('Conversion', '1')
+           and c.segment4 != '160500009';
+    
+    elsif in_glcode != 'ALL' and in_dept != 'ALL' and in_branch != 'ALL' then*/
+    open ret for
+    
+     select f.region,
+             f.zone_name,
+             c.segment2      branch_code,
+             c.segment3      cost_centre,
+             d.description   branch_or_dept_name,
+             c.segment4      gl_code,
+             e.description   gl_name,
+             a.period_name,
+             effective_date,
+             b.currency_code,
+             entered_cr,
+             entered_dr,
+             a.description   narration,
+            'EBS:'||g.invoice_payment_id ebs_reference, --added ebs reference and full narration
+            h.narration full_narration
+      from gl.gl_je_lines@oracle_erp          a,
+             gl.gl_je_headers@oracle_erp        b,
+            gl.gl_code_combinations@oracle_erp c,
+             apps.fnd_flex_values_vl@oracle_erp d,
+             apps.fnd_flex_values_vl@oracle_erp e,
+             fcubslive.ubn_brn_region@fcubs_dr  f,
+            ap.ap_invoice_payments_all@oracle_erp g,
+            apps.ubn_stage_payments@oracle_erp h
+       where a.je_header_id = b.je_header_id
+         and a.code_combination_id = c.code_combination_id
+         and c.segment3 = d.flex_value
+         and c.segment4 = e.flex_value
+         and c.segment2 = f.new_branch_code
+        and c.code_combination_id = g.asset_code_combination_id(+)
+        and nvl(entered_cr,entered_dr) = g.amount(+)
+        and g.invoice_payment_id = h.payment_id(+)
+         and a.status = 'P'
+         and actual_flag = 'A'
+         and d.flex_value_set_id = '1014907'
+        and (c.segment2 = in_branch OR in_branch = 'ALL')
+        and (c.segment3 = in_dept OR in_dept = 'ALL')
+         and (c.segment4 = in_glcode OR in_glcode = 'ALL')
+         and effective_date between in_startdate and in_enddate --parameter gl date
+         and je_source not in ('Conversion', '1')
+         and c.segment4 != '160500009'; --new
+         
+         
+
+  
+    /* elsif in_glcode != 'ALL' and in_dept = 'ALL' and in_branch = 'ALL' then
+      open ret for
+        select f.region,
+               c.segment2      branch_code,
+               c.segment3      cost_centre,
+               d.description   branch_or_dept_name,
+               c.segment4      gl_code,
+               e.description   gl_name,
+               a.period_name,
+               effective_date,
+               b.currency_code,
+               entered_cr,
+               entered_dr,
+               a.description   narration
+          from gl.gl_je_lines@oracle_erp          a,
+               gl.gl_je_headers@oracle_erp        b,
+               gl.gl_code_combinations@oracle_erp c,
+               apps.fnd_flex_values_vl@oracle_erp d,
+               apps.fnd_flex_values_vl@oracle_erp e,
+               apps.ebs_branch@oracle_erp         f
+         where a.je_header_id = b.je_header_id
+           and a.code_combination_id = c.code_combination_id
+           and c.segment3 = d.flex_value
+           and c.segment4 = e.flex_value
+           and c.segment2 = f.ebs_code(+)
+           and a.status = 'P'
+           and actual_flag = 'A'
+           and d.flex_value_set_id = '1014907'
+              ----and c.segment2 = in_branch
+              ----and c.segment3 = in_dept
+           and c.segment4 = in_glcode
+           and effective_date between in_startdate and in_enddate --parameter gl date
+           and je_source not in ('Conversion', '1')
+           and c.segment4 != '160500009';
+    
+    elsif in_glcode = 'ALL' and in_dept = 'ALL' and in_branch = 'ALL' then
+      open ret for
+        select f.region,
+               c.segment2      branch_code,
+               c.segment3      cost_centre,
+               d.description   branch_or_dept_name,
+               c.segment4      gl_code,
+               e.description   gl_name,
+               a.period_name,
+               effective_date,
+               b.currency_code,
+               entered_cr,
+               entered_dr,
+               a.description   narration
+          from gl.gl_je_lines@oracle_erp          a,
+               gl.gl_je_headers@oracle_erp        b,
+               gl.gl_code_combinations@oracle_erp c,
+               apps.fnd_flex_values_vl@oracle_erp d,
+               apps.fnd_flex_values_vl@oracle_erp e,
+               apps.ebs_branch@oracle_erp         f
+         where a.je_header_id = b.je_header_id
+           and a.code_combination_id = c.code_combination_id
+           and c.segment3 = d.flex_value
+           and c.segment4 = e.flex_value
+           and c.segment2 = f.ebs_code(+)
+           and a.status = 'P'
+           and actual_flag = 'A'
+           and d.flex_value_set_id = '1014907'
+              ----and c.segment2 = in_branch
+              ----and c.segment3 = in_dept
+              ----and c.segment4  = in_glcode
+           and effective_date between in_startdate and in_enddate --parameter gl date
+           and je_source not in ('Conversion', '1')
+           and c.segment4 != '160500009';
+    end if;*/
+  end prc_erp_gl_report;
+
+  procedure prc_ebus_gl_track(ret out sys_refcursor) is
+    v_date     date;
+    v_somdt    date;
+    v_mntstart date;
+  
+  begin
+    select prev_working_day,
+           (last_day(add_months(prev_working_day, -1)) + 1)
+      into v_date, v_somdt
+      from sttm_dates@fcubs_dr
+     where branch_code = '000';
+    if to_char(v_somdt, 'Dy') = 'Sat' then
+      v_mntstart := v_somdt + 2;
+    elsif to_char(v_somdt, 'Dy') = 'Sun' then
+      v_mntstart := v_somdt + 1;
+    else
+      v_mntstart := v_somdt;
+    end if;
+  
+    begin
+      open ret for
+        select /*cc.ac_branch,*/
+         cc.unit,
+         cc.ac_no,
+         cc.gl_desc,
+         cc.ac_ccy,
+         sum(dd.balance) mnth_opening_bal,
+         sum(cc.balance) curr_balance
+          from (select aa.branch_code ac_branch,
+                       bb.unit,
+                       aa.account_no ac_no,
+                       bb.gl_desc,
+                       aa.acc_ccy ac_ccy,
+                       decode(aa.acc_ccy,
+                              'NGN',
+                              aa.lcy_closing_bal,
+                              aa.acy_closing_bal) balance
+                  from rep_balance aa, ebus_gl_tracklist bb
+                 where aa.account_no = bb.gl_code
+                   and aa.reference_date = v_date
+                /*and aa.branch_code = in_branch*/
+                ) cc,
+               (select aa.branch_code ac_branch,
+                       aa.account_no ac_no,
+                       aa.acc_ccy ac_ccy,
+                       decode(aa.acc_ccy,
+                              'NGN',
+                              aa.lcy_closing_bal,
+                              aa.acy_closing_bal) balance
+                  from rep_balance aa, ebus_gl_tracklist bb
+                 where aa.account_no = bb.gl_code
+                   and aa.reference_date = v_mntstart) dd
+         where cc.ac_no = dd.ac_no
+           and cc.ac_branch = dd.ac_branch
+         group by cc.unit, cc.ac_no, cc.gl_desc, cc.ac_ccy;
+    end;
+  end prc_ebus_gl_track;
+
+  procedure prc_gefu_callover(in_refdate in date,
+                              in_user    in varchar2,
+                              ret        out sys_refcursor) is
+  begin
+    open ret for
+      select a.phy_file_name,
+             a.archival_date,
+             b.maker_id,
+             b.maker_dt_stamp,
+             b.chekcer_id,
+             b.checker_dt_stamp,
+             b.orig_branch_code,
+             trim(a.fld19) narration,
+             ---a.fld8 lcy_amount,
+             ---a.fld20            batch_no,
+             c.lcy_amount,
+             c.fcy_amount,
+             c.exch_rate,
+             c.ac_entry_sr_no,
+             c.external_ref_no,
+             c.related_customer,
+             c.auth_stat,
+             c.user_id,
+             c.auth_id,
+             c.ac_no,
+             d.ac_gl_desc,
+             c.trn_dt,
+             c.trn_ref_no,
+             c.trn_code,
+             c.value_dt,
+             c.instrument_code,
+             c.batch_no,
+             c.related_account,
+             c.drcr_ind,
+             c.ac_branch
+        from fcubslive.gita_upload_master@fcubs_dr a,
+             apps.gefuval_header@fcubs_dr          b,
+             acvw_all_ac_entries@fcubs_dr          c,
+             sttb_account@fcubs_dr                 d
+       where a.phy_file_name = b.filename(+)
+         and a.archival_date = trunc(b.checker_dt_stamp(+))
+         and c.trn_dt = in_refdate
+         and trim(a.fld9) = c.ac_no
+         and c.ac_no = d.ac_gl_no
+         and a.fld20 = c.batch_no
+         and a.fld8 = c.lcy_amount
+         and a.fld11 = c.drcr_ind
+         and a.fld10 = c.ac_branch
+         and a.fld1 = 'DEBDY1'
+         and a.status = 'P'
+         and b.maker_id = trim(in_user);
+  end prc_gefu_callover;
+
+  procedure prc_trn_aggregate(in_startdt in date,
+                              in_enddt   in date,
+                              ret        out sys_refcursor) is
+  begin
+    open ret for
+      select c.region,
+             a.trn_branch,
+             a.product_code,
+             upper(b.product_description) product_description,
+             sum(decode(drcr_ind, 'D', -lcy_amount)) dr_volume,
+             sum(decode(drcr_ind, 'C', lcy_amount)) cr_volume,
+             count(distinct a.trn_ref_no) txn_count
+        from tmp_rt_trn_dtls a, cstm_product@fcubs_dr b, ubn_brn_region c
+       where trn_dt between in_startdt and in_enddt
+         and a.product_code <> 'LOCH'
+         and a.product_code = b.product_code
+         and a.trn_branch = c.new_branch_code
+       group by c.region,
+                a.trn_branch,
+                a.product_code,
+                b.product_description
+      union all
+      select c.region,
+             a.trn_branch,
+             a.product_code,
+             upper(b.product_description) product_description,
+             sum(decode(drcr_ind, 'D', -lcy_amount)) dr_volume,
+             sum(decode(drcr_ind, 'C', lcy_amount)) cr_volume,
+             count(distinct a.trn_ref_no) txn_count
+        from tmp_rt_trn_dtls a, cstm_product@fcubs_dr b, ubn_brn_region c
+       where trn_dt between in_startdt and in_enddt
+         and a.product_code = 'LOCH'
+         and a.drcr_ind = 'C'
+         and a.product_code = b.product_code
+         and a.trn_branch = c.new_branch_code
+       group by c.region,
+                a.trn_branch,
+                a.product_code,
+                b.product_description
+      union all
+      select c.region,
+             a.branch_code,
+             decode(a.change_class,
+                    'OPENED ACCTS',
+                    'OPN',
+                    'CLOSED ACCTS',
+                    'CLS',
+                    'REACTIVATED ACCTS',
+                    'REAC') product_code,
+             a.change_class product_description,
+             0 dr_volume,
+             0 cr_volume,
+             sum(a.numbr) txn_count
+        from rep_branch_maintenace a, ubn_brn_region c
+       where a.reference_date between in_startdt and in_enddt
+         and a.branch_code = c.new_branch_code
+       group by c.region, a.branch_code, a.change_class
+       order by 1, 2, 3;
+  end prc_trn_aggregate;
+
+  procedure prc_loan_attrition(in_startdt in date,
+                               in_enddt   in date,
+                               ret        out sys_refcursor) is
+  
+  begin
+    open ret for
+      select aa.branch_code,
+             ee.branch_name,
+             aa.customer_id,
+             dd.dr_prod_ac,
+             aa.account_number,
+             aa.primary_applicant_name,
+             aa.product_code,
+             ff.product_description,
+             aa.book_date,
+             aa.original_st_date,
+             aa.value_date,
+             aa.maturity_date,
+             aa.currency,
+             aa.amount_financed,
+             bb.event_code,
+             (select event_descr
+                from cstb_event@fcubs_dr
+               where module = 'CL'
+                 and event_code = bb.event_code) event_description,
+             bb.value_date liquidation_dt,
+             bb.amount due_amount,
+             bb.amount_settled attrition_amt,
+             (aa.amount_financed - cc.amount_settled) facility_bal,
+             case
+               when bb.event_code = 'DSBR' then
+                0
+               else
+                ((aa.amount_financed - cc.amount_settled) +
+                bb.amount_settled)
+             end previous_bal,
+             gg.cust_mis_4 rm_code,
+             (select code_desc
+                from gltm_mis_code@fcubs_dr
+               where mis_class = 'RM_CODE'
+                 and mis_code = gg.cust_mis_4) rm_name,
+             gg.cust_mis_2 seg_code,
+             (select code_desc
+                from gltm_mis_code@fcubs_dr
+               where mis_class = 'BIZ_SEG'
+                 and mis_code = gg.cust_mis_2) segment_name
+      
+        from fcubslive.cltb_account_apps_master@fcubs_dr aa,
+             (select account_number,
+                     event_code,
+                     value_date,
+                     sum(amount) amount,
+                     sum(amount_settled) amount_settled
+                from fcubslive.cltb_event_entries@fcubs_dr
+               where event_code not in
+                     ('ACCR', 'PROV', 'FACR', 'RACR', 'STCH', 'RSVC', 'DSBR')
+                 and value_date between in_startdt and in_enddt
+                 and dr_trn_code not in
+                     ('ISF', 'RNF', 'TRQ', 'MFQ', 'TMQ', 'PCH', 'TPQ')
+                 and component_name = 'PRINCIPAL'
+               group by account_number, event_code, value_date
+               order by 1) bb,
+             
+             (select account_number, sum(nvl(amount_paid, 0)) amount_settled
+                from cltb_amount_paid@fcubs_dr
+               where component_name = 'PRINCIPAL'
+                 and paid_date <= in_enddt
+               group by account_number) cc,
+             (select *
+                from fcubslive.cltb_account_components@fcubs_dr
+               where length(dr_prod_ac) = 10
+                 and component_name = 'PRINCIPAL') dd,
+             sttm_branch@fcubs_dr ee,
+             cstm_product@fcubs_dr ff,
+             mitm_customer_default@fcubs_dr gg
+       where aa.account_number = bb.account_number
+         and aa.account_number = cc.account_number
+         and aa.account_number = dd.account_number(+)
+         and aa.branch_code = ee.branch_code
+         and aa.product_code = ff.product_code
+         and aa.customer_id = gg.customer;
+  end prc_loan_attrition;
+
+  procedure prc_gl_balances(in_period in varchar2, ret out sys_refcursor) is
+    v_finyr       varchar2(6) := 'FY' || substr(in_period, 1, 4);
+    v_period_code varchar2(3) := 'M' || substr(in_period, 5, 2);
+  
+  begin
+    open ret for
+      select a.branch_code,
+             b.branch_name,
+             ccy_code,
+             gl_code,
+             fin_year,
+             period_code,
+             dr_bal,
+             cr_bal,
+             dr_bal_lcy,
+             cr_bal_lcy
+        from gltb_gl_bal@fcubs_dr a, DW_sttm_branch b
+       where a.branch_code = b.branch_code
+         and fin_year = v_finyr
+         and period_code = v_period_code
+         and gl_code in ('615000002',
+                         '610000014',
+                         '610000015',
+                         '610000016',
+                         '610000017',
+                         '610000018',
+                         '610000019',
+                         '610000020',
+                         '610000024')
+         and (cr_bal_lcy <> 0 or dr_bal_lcy <> 0)
+       order by a.branch_code;
+  end prc_gl_balances;
+
+  procedure prc_od_renewal_cycle(ret out sys_refcursor) is
+    v_date date;
+  
+  begin
+    select prev_working_day
+      into v_date
+      from fcubslive.sttm_dates@fcubs_dr
+     where branch_code = '000';
+    open ret for
+    
+      select a.branch_code brn,
+             upper(c.branch_name) brn_name,
+             to_char(a.cust_ac_no) new_ac_no,
+             to_char(a.alt_ac_no) old_ac_no,
+             a.cust_no cust_id,
+             a.ac_desc "CUSTOMER NAME",
+             to_char(a.account_class) product,
+             d.description "PRODUCT NAME",
+             a.ccy,
+             b.line "LIMIT ACY",
+             (case
+               when b.line_expiry_date > v_date then
+                b.line
+               else
+                0
+             end) "OD AVAILABLE LIMIT ACY",
+             b.line_start_date "LIMIT VALUE DATE",
+             b.line_expiry_date "LIMIT EXPIRY DATE",
+             a.tod_limit,
+             tod_limit_start_date tod_start,
+             a.tod_limit_end_date tod_end,
+             (case
+               when a.tod_limit_end_date > v_date and
+                    b.line_expiry_date > v_date then
+                to_number(b.line) + to_number(a.tod_limit)
+               when (a.tod_limit_end_date < v_date or
+                    a.tod_limit_end_date is null) and
+                    b.line_expiry_date > v_date then
+                to_number(b.line)
+               when a.tod_limit_end_date > v_date and
+                    (b.line_expiry_date < v_date or
+                    b.line_expiry_date is null) then
+                to_number(a.tod_limit)
+               else
+                0
+             end) "TOTAL AVAILABLE LIMIT ACY",
+             a.acy_curr_balance "TOTAL BALANCE ACY",
+             a.lcy_curr_balance "TOTAL BALANCE LCY",
+             a.date_last_dr_activity date_last_dr,
+             a.date_last_cr_activity date_last_cr,
+             a.overdraft_since overdraft_since,
+             (case
+               when a.status_change_automatic in ('Y') then
+                'AUTO'
+               else
+                'MANUAL'
+             end) "CLASSIFICATION MODE",
+             decode(a.acc_status,
+                    'NORM',
+                    'PERFORMING',
+                    'WTL1',
+                    'WATCHLIST1',
+                    'WTL2',
+                    'WATCHLIST2',
+                    'WTL3',
+                    'WATCHLIST3',
+                    'SUBS',
+                    'SUBSTANDARD',
+                    'DOUB',
+                    'DOUBTFUL',
+                    'LOSS',
+                    'LOST',
+                    'WOFF',
+                    'WRITE-OFF',
+                    'NO RATING') "SYSTEM CLASS",
+             b.tranche_category booking_type,
+             b.tranche_description,
+             upper(mi.cbn) "CBN CLASSIFICATION",
+             upper(mi.rm) "RELATIONSHIP MANAGER",
+             upper(mi.minbiz) "MINOR BIZ SEGMENT",
+             upper(mi.majbiz) "MAJOR BIZ SEGMENT",
+             b.linecode,
+             b.line_serial,
+             b.clean_up_cycle,
+             b.monthly_turnover,
+             b.available_amount,
+             b.amount_utilised_today,
+             b.amount_reinstated_today,
+             b.crms_ref_number,
+             b.portfolio,
+             b.line_mat,
+             b.liab_br
+        from fcubslive.sttm_cust_account@fcubs_dr a
+        left join (select c.customer,
+                          nvl((select b.code_desc
+                                from fcubslive.gltm_mis_code@fcubs_dr b
+                               where b.mis_code = c.cust_mis_1
+                                 and b.mis_class = 'CBN'),
+                              'UNTAGGED') cbn,
+                          nvl((select b.code_desc
+                                from fcubslive.gltm_mis_code@fcubs_dr b
+                               where b.mis_code = c.cust_mis_4
+                                 and b.mis_class = 'RM_CODE'),
+                              'UNTAGGED') rm,
+                          nvl((select b.code_desc
+                                from fcubslive.gltm_mis_code@fcubs_dr b
+                               where b.mis_code = c.cust_mis_2
+                                 and b.mis_class = 'BIZ_SEG'),
+                              'UNTAGGED') minbiz,
+                          (case
+                            when c.cust_mis_2 in
+                                 ('REA_330', 'REM_310', 'RHN_340', 'RUM_320') then
+                             'RETAIL'
+                            when c.cust_mis_2 in ('SME_410', 'SME_420') then
+                             'SME'
+                            when c.cust_mis_2 in
+                                 ('COM_210', 'COM_220', 'COM_230') then
+                             'COMMERCIAL'
+                            when c.cust_mis_2 in ('TRE_510') then
+                             'TREASURY'
+                            when c.cust_mis_2 in ('COR_110',
+                                                  'COR_120',
+                                                  'COR_130',
+                                                  'COR_140',
+                                                  'COR_150') then
+                             'CORPORATE'
+                            else
+                             'UNTAGGED'
+                          end) majbiz
+                     from fcubslive.mitm_customer_default@fcubs_dr c) mi
+          on mi.customer = a.cust_no,
+       (select xx.cust_ac_no casa_no,
+                     xx.customer_no,
+                     aa.limit_amount line,
+                     aa.line_currency ccy,
+                     (aa.utilisation) od_utilized,
+                     aa.booking_date,
+                     aa.line_start_date,
+                     aa.line_expiry_date,
+                     xx.linked_ref_no,
+                     'FACLT' linksource,
+                     xx.effective_date,
+                     aa.udf_value_6 tranche_category,
+                     aa.description tranche_description,
+                     aa.udf_value_1 AS linecode,
+                     aa.line_serial,
+                     aa.udf_value_2 AS clean_up_cycle,
+                     aa.udf_value_3 AS monthly_turnover,
+                     aa.available_amount,
+                     aa.amount_utilised_today,
+                     aa.amount_reinstated_today,
+                     aa.udf_value_7 AS crms_ref_number,
+                     aa.udf_value_8 AS portfolio,
+                     aa.udf_value_9 AS line_mat,
+                     aa.liab_br
+                from fcubslive.getm_facility@fcubs_dr              aa,
+                     fcubslive.getm_liab@fcubs_dr                  bb,
+                     fcubslive.sttm_cust_account_linkages@fcubs_dr xx
+               where xx.customer_no = bb.liab_no
+                 and bb.id = aa.liab_id
+                 and xx.linked_ref_no = aa.line_code || aa.line_serial) b,
+       fcubslive.sttm_branch@fcubs_dr c,
+       fcubslive.sttm_account_class@fcubs_dr d
+       where a.branch_code = c.branch_code
+         and a.account_class != 'CT_001'
+         and a.cust_ac_no = b.casa_no
+         and a.branch_code = c.branch_code
+         and a.account_class = d.account_class;
+  end prc_od_renewal_cycle;
+
+  procedure prc_npl_rpt(ret out sys_refcursor) is
+    v_curr_date        date;
+    v_lastmnthend      date;
+    v_penulmnthend     date;
+    v_bus_lastmnthend  date;
+    v_bus_penulmnthend date;
+    /*    v_sql1             varchar2(1000);
+      v_sql2             varchar2(1000);
+    */
+  begin
+    select prev_working_day,
+           last_day(add_months(prev_working_day, -1)),
+           last_day(add_months(prev_working_day, -2))
+      into v_curr_date, v_lastmnthend, v_penulmnthend
+      from fcubslive.sttm_dates@fcubs_dr
+     where branch_code = '000';
+  
+    select reference_date
+      into v_bus_lastmnthend
+      from (select distinct reference_date,
+                            row_number() over(order by reference_date desc) rnk
+              from crm_clr_report_hist
+             where reference_date <= v_lastmnthend)
+     where rnk = 1;
+  
+    select reference_date
+      into v_bus_penulmnthend
+      from (select distinct reference_date,
+                            row_number() over(order by reference_date desc) rnk
+              from crm_clr_report_hist
+             where reference_date <= v_penulmnthend)
+     where rnk = 1;
+  
+    open ret for
+    
+      select dd.retail_product,
+             nvl(sum(global_limit), 0) global_limit,
+             nvl(sum(total_balance), 0) total_balance,
+             ----nvl(sum((total_pdo + total_performing)), 0) total_balance,
+             nvl(sum(bb.penulmnthend_balance), 0) penulmnthend_balance,
+             nvl(sum(cc.lastmnthend), 0) lastmnthend_balance,
+             ----nvl(sum(ee.total_performing), 0) total_performing,
+             (nvl(sum(total_balance), 0) - nvl(sum(total_pdo), 0)) total_performing,
+             nvl(sum(total_pdo), 0) total_pdo,
+             nvl(sum(total_npl), 0) total_npl,
+             nvl(sum("1 - 7"), 0) "1 - 7",
+             nvl(sum("8 - 29"), 0) "8 - 29",
+             nvl(sum("30 - 59"), 0) "30 - 59",
+             nvl(sum("60 - 89"), 0) "60 - 89",
+             nvl(sum("90 - 179"), 0) "90 - 179",
+             nvl(sum("180 - 359"), 0) "180 - 359",
+             nvl(sum(" >= 360"), 0) " >= 360",
+             nvl(sum(penulmnthend_tot_pdo), 0) penulmnthend_tot_pdo,
+             nvl(sum(lastmnthend_tot_pdo), 0) lastmnthend_tot_pdo,
+             nvl(sum(penulmnthend_actual_npl), 0) penulmnthend_actual_npl,
+             nvl(sum(lastmnthend_actual_npl), 0) lastmnthend_actual_npl
+        from (select aa.product,
+                     sum(aa.principal_balance_lcy) penulmnthend_balance,
+                     /*sum(aa.total_amt_past_due)*/
+                     sum(aa.less_than_8_days + aa.btw_8_and_29_days +
+                         aa.btw_30_and_59_days + aa.btw_60_and_89_days +
+                         aa.btw_90_and_179_days + aa.btw_180_and_359_days +
+                         aa.over_360_days) penulmnthend_tot_pdo,
+                     sum(aa.btw_90_and_179_days + aa.btw_180_and_359_days +
+                         aa.over_360_days) penulmnthend_actual_npl
+                from crm_clr_report_hist aa, ubn_cl_mapping a1
+               where aa.product = a1.product_code
+                 and aa.reference_date = v_bus_penulmnthend
+                 and upper(nvl(aa.major_biz_segment, 'UNTAGGED')) in
+                     ('RETAIL', 'UNTAGGED')
+               group by aa.product) bb,
+             (select aa.product,
+                     sum(aa.principal_balance_lcy) lastmnthend,
+                     /*sum(aa.total_amt_past_due)*/
+                     sum(aa.less_than_8_days + aa.btw_8_and_29_days +
+                         aa.btw_30_and_59_days + aa.btw_60_and_89_days +
+                         aa.btw_90_and_179_days + aa.btw_180_and_359_days +
+                         aa.over_360_days) lastmnthend_tot_pdo,
+                     sum(aa.btw_90_and_179_days + aa.btw_180_and_359_days +
+                         aa.over_360_days) lastmnthend_actual_npl
+                from crm_clr_report_hist aa, ubn_cl_mapping a1
+               where aa.product = a1.product_code
+                 and aa.reference_date = v_bus_lastmnthend
+                 and upper(nvl(aa.major_biz_segment, 'UNTAGGED')) in
+                     ('RETAIL', 'UNTAGGED')
+               group by aa.product) cc,
+             ubn_cl_mapping dd,
+             (select a.*, b.total_performing
+                from (select vv.product,
+                             sum(vv.global_limit) global_limit,
+                             sum(vv.principal_balance_lcy) total_balance,
+                             ----sum(vv.total_amt_past_due) total_pdo,
+                             sum(vv.less_than_8_days + vv.btw_8_and_29_days +
+                                 vv.btw_30_and_59_days +
+                                 vv.btw_60_and_89_days +
+                                 vv.btw_90_and_179_days +
+                                 vv.btw_180_and_359_days + vv.over_360_days) total_pdo,
+                             sum(vv.btw_90_and_179_days +
+                                 vv.btw_180_and_359_days + vv.over_360_days) total_npl,
+                             sum(vv.less_than_8_days) "1 - 7",
+                             sum(vv.btw_8_and_29_days) "8 - 29",
+                             sum(vv.btw_30_and_59_days) "30 - 59",
+                             sum(vv.btw_60_and_89_days) "60 - 89",
+                             sum(vv.btw_90_and_179_days) "90 - 179",
+                             sum(vv.btw_180_and_359_days) "180 - 359",
+                             sum(vv.over_360_days) " >= 360"
+                        from crm_clr_report_new vv
+                       where upper(nvl(vv.major_biz_segment, 'UNTAGGED')) in
+                             ('RETAIL', 'UNTAGGED')
+                       group by vv.product) a,
+                     (select v1.product,
+                             sum(v1.principal_balance_lcy) total_performing
+                        from crm_clr_report_new v1, ubn_cl_mapping v2
+                       where v1.product = v2.product_code
+                         and v1.classification = 'PERFORMING'
+                         and nvl(v1.dpd, 0) = 0
+                         and nvl(v1.less_than_8_days, 0) = '0'
+                         and upper(nvl(v1.major_biz_segment, 'UNTAGGED')) in
+                             ('RETAIL', 'UNTAGGED')
+                       group by v1.product) b
+               where a.product = b.product) ee
+       where bb.product(+) = cc.product
+         and cc.product(+) = dd.product_code
+         and dd.product_code = ee.product(+)
+       group by dd.retail_product
+       order by 1;
+  end prc_npl_rpt;
+
+  procedure prc_legacy_npl_rpt(ret out sys_refcursor) is
+    v_curr_date        date;
+    v_lastmnthend      date;
+    v_penulmnthend     date;
+    v_bus_lastmnthend  date;
+    v_bus_penulmnthend date;
+    /*    v_sql1             varchar2(1000);
+      v_sql2             varchar2(1000);
+    */
+  begin
+    select prev_working_day,
+           last_day(add_months(prev_working_day, -1)),
+           last_day(add_months(prev_working_day, -2))
+      into v_curr_date, v_lastmnthend, v_penulmnthend
+      from fcubslive.sttm_dates@fcubs_dr
+     where branch_code = '000';
+  
+    select reference_date
+      into v_bus_lastmnthend
+      from (select distinct reference_date,
+                            row_number() over(order by reference_date desc) rnk
+              from crm_clr_report_hist
+             where reference_date <= v_lastmnthend)
+     where rnk = 1;
+  
+    select reference_date
+      into v_bus_penulmnthend
+      from (select distinct reference_date,
+                            row_number() over(order by reference_date desc) rnk
+              from crm_clr_report_hist
+             where reference_date <= v_penulmnthend)
+     where rnk = 1;
+  
+    open ret for
+    
+      select dd.retail_product,
+             nvl(sum(global_limit), 0) global_limit,
+             nvl(sum(total_balance), 0) total_balance,
+             ----nvl(sum((total_pdo + total_performing)), 0) total_balance,
+             nvl(sum(bb.penulmnthend_balance), 0) penulmnthend_balance,
+             nvl(sum(cc.lastmnthend), 0) lastmnthend_balance,
+             ----nvl(sum(ee.total_performing), 0) total_performing,
+             (nvl(sum(total_balance), 0) - nvl(sum(total_pdo), 0)) total_performing,
+             nvl(sum(total_pdo), 0) total_pdo,
+             nvl(sum(total_npl), 0) total_npl,
+             nvl(sum("1 - 7"), 0) "1 - 7",
+             nvl(sum("8 - 29"), 0) "8 - 29",
+             nvl(sum("30 - 59"), 0) "30 - 59",
+             nvl(sum("60 - 89"), 0) "60 - 89",
+             nvl(sum("90 - 179"), 0) "90 - 179",
+             nvl(sum("180 - 359"), 0) "180 - 359",
+             nvl(sum(" >= 360"), 0) " >= 360",
+             nvl(sum(penulmnthend_tot_pdo), 0) penulmnthend_tot_pdo,
+             nvl(sum(lastmnthend_tot_pdo), 0) lastmnthend_tot_pdo,
+             nvl(sum(penulmnthend_actual_npl), 0) penulmnthend_actual_npl,
+             nvl(sum(lastmnthend_actual_npl), 0) lastmnthend_actual_npl
+        from (select aa.product,
+                     sum(aa.principal_balance_lcy) penulmnthend_balance,
+                     /*sum(aa.total_amt_past_due)*/
+                     sum(aa.less_than_8_days + aa.btw_8_and_29_days +
+                         aa.btw_30_and_59_days + aa.btw_60_and_89_days +
+                         aa.btw_90_and_179_days + aa.btw_180_and_359_days +
+                         aa.over_360_days) penulmnthend_tot_pdo,
+                     sum(aa.btw_90_and_179_days + aa.btw_180_and_359_days +
+                         aa.over_360_days) penulmnthend_actual_npl
+                from crm_clr_report_hist aa, ubn_cl_mapping a1
+               where aa.product = a1.product_code
+                 and nvl(aa.limit_value_date, sysdate) < '01-jul-2013'
+                 and aa.reference_date = v_bus_penulmnthend
+                 and upper(nvl(aa.major_biz_segment, 'UNTAGGED')) in
+                     ('RETAIL', 'UNTAGGED')
+               group by aa.product) bb,
+             (select aa.product,
+                     sum(aa.principal_balance_lcy) lastmnthend,
+                     /*sum(aa.total_amt_past_due)*/
+                     sum(aa.less_than_8_days + aa.btw_8_and_29_days +
+                         aa.btw_30_and_59_days + aa.btw_60_and_89_days +
+                         aa.btw_90_and_179_days + aa.btw_180_and_359_days +
+                         aa.over_360_days) lastmnthend_tot_pdo,
+                     sum(aa.btw_90_and_179_days + aa.btw_180_and_359_days +
+                         aa.over_360_days) lastmnthend_actual_npl
+                from crm_clr_report_hist aa, ubn_cl_mapping a1
+               where aa.product = a1.product_code
+                 and nvl(aa.limit_value_date, sysdate) < '01-jul-2013'
+                 and aa.reference_date = v_bus_lastmnthend
+                 and upper(nvl(aa.major_biz_segment, 'UNTAGGED')) in
+                     ('RETAIL', 'UNTAGGED')
+               group by aa.product) cc,
+             ubn_cl_mapping dd,
+             (select a.*, b.total_performing
+                from (select vv.product,
+                             sum(vv.global_limit) global_limit,
+                             sum(vv.principal_balance_lcy) total_balance,
+                             ----sum(vv.total_amt_past_due) total_pdo,
+                             sum(vv.less_than_8_days + vv.btw_8_and_29_days +
+                                 vv.btw_30_and_59_days +
+                                 vv.btw_60_and_89_days +
+                                 vv.btw_90_and_179_days +
+                                 vv.btw_180_and_359_days + vv.over_360_days) total_pdo,
+                             sum(vv.btw_90_and_179_days +
+                                 vv.btw_180_and_359_days + vv.over_360_days) total_npl,
+                             sum(vv.less_than_8_days) "1 - 7",
+                             sum(vv.btw_8_and_29_days) "8 - 29",
+                             sum(vv.btw_30_and_59_days) "30 - 59",
+                             sum(vv.btw_60_and_89_days) "60 - 89",
+                             sum(vv.btw_90_and_179_days) "90 - 179",
+                             sum(vv.btw_180_and_359_days) "180 - 359",
+                             sum(vv.over_360_days) " >= 360"
+                        from crm_clr_report_new vv
+                       where upper(nvl(vv.major_biz_segment, 'UNTAGGED')) in
+                             ('RETAIL', 'UNTAGGED')
+                         and nvl(vv.limit_value_date, sysdate) <
+                             '01-jul-2013'
+                       group by vv.product) a,
+                     (select v1.product,
+                             sum(v1.principal_balance_lcy) total_performing
+                        from crm_clr_report_new v1, ubn_cl_mapping v2
+                       where v1.product = v2.product_code
+                         and nvl(v1.limit_value_date, sysdate) <
+                             '01-jul-2013'
+                         and v1.classification = 'PERFORMING'
+                         and nvl(v1.dpd, 0) = 0
+                         and nvl(v1.less_than_8_days, 0) = '0'
+                         and upper(nvl(v1.major_biz_segment, 'UNTAGGED')) in
+                             ('RETAIL', 'UNTAGGED')
+                       group by v1.product) b
+               where a.product = b.product) ee
+       where bb.product(+) = cc.product
+         and cc.product(+) = dd.product_code
+         and dd.product_code = ee.product(+)
+       group by dd.retail_product
+       order by 1;
+  end prc_legacy_npl_rpt;
+
+  procedure prc_new_npl_rpt(ret out sys_refcursor) is
+    v_curr_date        date;
+    v_lastmnthend      date;
+    v_penulmnthend     date;
+    v_bus_lastmnthend  date;
+    v_bus_penulmnthend date;
+    /*    v_sql1             varchar2(1000);
+      v_sql2             varchar2(1000);
+    */
+  begin
+    select prev_working_day,
+           last_day(add_months(prev_working_day, -1)),
+           last_day(add_months(prev_working_day, -2))
+      into v_curr_date, v_lastmnthend, v_penulmnthend
+      from fcubslive.sttm_dates@fcubs_dr
+     where branch_code = '000';
+  
+    select reference_date
+      into v_bus_lastmnthend
+      from (select distinct reference_date,
+                            row_number() over(order by reference_date desc) rnk
+              from crm_clr_report_hist
+             where reference_date <= v_lastmnthend)
+     where rnk = 1;
+  
+    select reference_date
+      into v_bus_penulmnthend
+      from (select distinct reference_date,
+                            row_number() over(order by reference_date desc) rnk
+              from crm_clr_report_hist
+             where reference_date <= v_penulmnthend)
+     where rnk = 1;
+  
+    open ret for
+    
+      select dd.retail_product,
+             nvl(sum(global_limit), 0) global_limit,
+             nvl(sum(total_balance), 0) total_balance,
+             ----nvl(sum((total_pdo + total_performing)), 0) total_balance,
+             nvl(sum(bb.penulmnthend_balance), 0) penulmnthend_balance,
+             nvl(sum(cc.lastmnthend), 0) lastmnthend_balance,
+             ----nvl(sum(ee.total_performing), 0) total_performing,
+             (nvl(sum(total_balance), 0) - nvl(sum(total_pdo), 0)) total_performing,
+             nvl(sum(total_pdo), 0) total_pdo,
+             nvl(sum(total_npl), 0) total_npl,
+             nvl(sum("1 - 7"), 0) "1 - 7",
+             nvl(sum("8 - 29"), 0) "8 - 29",
+             nvl(sum("30 - 59"), 0) "30 - 59",
+             nvl(sum("60 - 89"), 0) "60 - 89",
+             nvl(sum("90 - 179"), 0) "90 - 179",
+             nvl(sum("180 - 359"), 0) "180 - 359",
+             nvl(sum(" >= 360"), 0) " >= 360",
+             nvl(sum(penulmnthend_tot_pdo), 0) penulmnthend_tot_pdo,
+             nvl(sum(lastmnthend_tot_pdo), 0) lastmnthend_tot_pdo,
+             nvl(sum(penulmnthend_actual_npl), 0) penulmnthend_actual_npl,
+             nvl(sum(lastmnthend_actual_npl), 0) lastmnthend_actual_npl
+        from (select aa.product,
+                     sum(aa.principal_balance_lcy) penulmnthend_balance,
+                     /*sum(aa.total_amt_past_due)*/
+                     sum(aa.less_than_8_days + aa.btw_8_and_29_days +
+                         aa.btw_30_and_59_days + aa.btw_60_and_89_days +
+                         aa.btw_90_and_179_days + aa.btw_180_and_359_days +
+                         aa.over_360_days) penulmnthend_tot_pdo,
+                     sum(aa.btw_90_and_179_days + aa.btw_180_and_359_days +
+                         aa.over_360_days) penulmnthend_actual_npl
+                from crm_clr_report_hist aa, ubn_cl_mapping a1
+               where aa.product = a1.product_code
+                 and nvl(aa.limit_value_date, sysdate) >= '01-jul-2013'
+                 and aa.reference_date = v_bus_penulmnthend
+                 and upper(nvl(aa.major_biz_segment, 'UNTAGGED')) in
+                     ('RETAIL', 'UNTAGGED')
+               group by aa.product) bb,
+             (select aa.product,
+                     sum(aa.principal_balance_lcy) lastmnthend,
+                     /*sum(aa.total_amt_past_due)*/
+                     sum(aa.less_than_8_days + aa.btw_8_and_29_days +
+                         aa.btw_30_and_59_days + aa.btw_60_and_89_days +
+                         aa.btw_90_and_179_days + aa.btw_180_and_359_days +
+                         aa.over_360_days) lastmnthend_tot_pdo,
+                     sum(aa.btw_90_and_179_days + aa.btw_180_and_359_days +
+                         aa.over_360_days) lastmnthend_actual_npl
+                from crm_clr_report_hist aa, ubn_cl_mapping a1
+               where aa.product = a1.product_code
+                 and nvl(aa.limit_value_date, sysdate) >= '01-jul-2013'
+                 and aa.reference_date = v_bus_lastmnthend
+                 and upper(nvl(aa.major_biz_segment, 'UNTAGGED')) in
+                     ('RETAIL', 'UNTAGGED')
+               group by aa.product) cc,
+             ubn_cl_mapping dd,
+             (select a.*, b.total_performing
+                from (select vv.product,
+                             sum(vv.global_limit) global_limit,
+                             sum(vv.principal_balance_lcy) total_balance,
+                             ----sum(vv.total_amt_past_due) total_pdo,
+                             sum(vv.less_than_8_days + vv.btw_8_and_29_days +
+                                 vv.btw_30_and_59_days +
+                                 vv.btw_60_and_89_days +
+                                 vv.btw_90_and_179_days +
+                                 vv.btw_180_and_359_days + vv.over_360_days) total_pdo,
+                             sum(vv.btw_90_and_179_days +
+                                 vv.btw_180_and_359_days + vv.over_360_days) total_npl,
+                             sum(vv.less_than_8_days) "1 - 7",
+                             sum(vv.btw_8_and_29_days) "8 - 29",
+                             sum(vv.btw_30_and_59_days) "30 - 59",
+                             sum(vv.btw_60_and_89_days) "60 - 89",
+                             sum(vv.btw_90_and_179_days) "90 - 179",
+                             sum(vv.btw_180_and_359_days) "180 - 359",
+                             sum(vv.over_360_days) " >= 360"
+                        from crm_clr_report_new vv
+                       where upper(nvl(vv.major_biz_segment, 'UNTAGGED')) in
+                             ('RETAIL', 'UNTAGGED')
+                         and nvl(vv.limit_value_date, sysdate) >=
+                             '01-jul-2013'
+                       group by vv.product) a,
+                     (select v1.product,
+                             sum(v1.principal_balance_lcy) total_performing
+                        from crm_clr_report_new v1, ubn_cl_mapping v2
+                       where v1.product = v2.product_code
+                         and nvl(v1.limit_value_date, sysdate) >=
+                             '01-jul-2013'
+                         and v1.classification = 'PERFORMING'
+                         and nvl(v1.dpd, 0) = 0
+                         and nvl(v1.less_than_8_days, 0) = '0'
+                         and upper(nvl(v1.major_biz_segment, 'UNTAGGED')) in
+                             ('RETAIL', 'UNTAGGED')
+                       group by v1.product) b
+               where a.product = b.product) ee
+       where bb.product(+) = cc.product
+         and cc.product(+) = dd.product_code
+         and dd.product_code = ee.product(+)
+       group by dd.retail_product
+       order by 1;
+  end prc_new_npl_rpt;
+
+  procedure prc_failed_si_rpt(ret out sys_refcursor) is
+  begin
+    open ret for
+      select a.retry_date,
+             a.contract_ref_no,
+             c.si_amt,
+             a.dr_account,
+             d.ac_desc dr_ac_desc,
+             d.ac_open_date dr_ac_open_dt,
+             d.account_class dr_ac_class,
+             (select description
+                from sttm_account_class@fcubs_dr
+               where account_class = d.account_class) dr_class_desc,
+             a.dr_acc_ccy,
+             a.amt_debited,
+             a.cr_acc_br,
+             a.cr_account,
+             e.ac_desc cr_ac_desc,
+             e.ac_open_date cr_ac_open_dt,
+             e.account_class cr_ac_class,
+             (select description
+                from sttm_account_class@fcubs_dr
+               where account_class = e.account_class) cr_class_desc,
+             a.cr_acc_ccy,
+             a.amt_credited,
+             b.parameters,
+             c.si_expiry_date,
+             a.branch_code,
+             d.acy_curr_balance
+        from sitb_cycle_detail@fcubs_dr       a,
+             cstb_contract_exception@fcubs_dr b,
+             sitb_contract_master@fcubs_dr    c,
+             sttm_cust_account@fcubs_dr       d,
+             sttm_cust_account@fcubs_dr       e
+       where a.contract_ref_no = b.contract_ref_no
+         and a.contract_ref_no = c.contract_ref_no
+         and a.event_code = b.event_code
+         and a.retry_date = b.branch_date
+         and a.dr_account = d.cust_ac_no
+         and a.cr_account = e.cust_ac_no
+         and a.event_code = 'REJT'
+         and e.account_class in
+             ('SA_014', 'SA_015', 'SA_016', 'SA_017', 'SA_018');
+  end;
+
+  procedure prc_rm_attrition_rpt(in_rmcode in varchar2,
+                                 ret       out sys_refcursor) is
+  begin
+    open ret for
+      select aa.cust_no,
+             aa.customer_name,
+             aa.phone_number,
+             aa.email,
+             aa.avgbal_6m       avgbal_6m,
+             aa.avgbal_2m       avgbal_2m,
+             aa.avg_tur_6m      avg_tur_6m,
+             aa.avg_turn_2m     avg_turn_2m,
+             aa.avg_drcnt_6m    avg_drcnt_6m,
+             aa.avg_drcnt_2m    avg_drcnt_2m,
+             aa.rm_code,
+             bb.designation,
+             aa.rm_name,
+             aa.segment_code,
+             aa.sub_segment,
+             aa.branch_code,
+             aa.branch_name,
+             bb.hub,
+             bb.cluster_name,
+             bb.division_region,
+             bb.email           rm_email
+        from rep_retail_attrition aa, rtl_heirachy_view bb
+       where aa.rm_code = bb.staffno(+)
+         and aa.rm_code = in_rmcode;
+  end prc_rm_attrition_rpt;
+
+  procedure prc_grprm_attrition_summ(in_segcode in varchar2,
+                                     ret        out sys_refcursor) is
+  begin
+    open ret for
+      select aa.rm_code,
+             aa.rm_name,
+             upper(bb.hub) hub,
+             upper(bb.cluster_name) cluster_name,
+             upper(bb.division_region) area,
+             aa.segment_code,
+             aa.sub_segment,
+             sum(aa.avgbal_6m) avgbal_6m,
+             sum(aa.avgbal_2m) avgbal_2m,
+             sum(aa.avg_tur_6m) avg_tur_6m,
+             sum(aa.avg_turn_2m) avg_turn_2m,
+             sum(aa.avg_drcnt_6m) avg_drcnt_6m,
+             sum(aa.avg_drcnt_2m) avg_drcnt_2m
+        from rep_retail_attrition aa, rtl_heirachy_view bb
+       where aa.rm_code = bb.staffno
+         and aa.segment_code = in_segcode
+       group by aa.rm_code,
+                aa.rm_name,
+                bb.hub,
+                bb.cluster_name,
+                bb.division_region,
+                aa.segment_code,
+                aa.sub_segment;
+  end prc_grprm_attrition_summ;
+
+  procedure prc_grpcluster_attrition_summ(in_segcode in varchar2,
+                                          ret        out sys_refcursor) is
+  begin
+    open ret for
+      select /*aa.rm_code,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       aa.rm_name,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       bb.hub hub,*/
+       nvl(upper(bb.cluster_name), 'UNTAGGED') cluster_name,
+       /* bb.division_region area,*/
+       aa.segment_code,
+       aa.sub_segment,
+       sum(aa.avgbal_6m) avgbal_6m,
+       sum(aa.avgbal_2m) avgbal_2m,
+       sum(aa.avg_tur_6m) avg_tur_6m,
+       sum(aa.avg_turn_2m) avg_turn_2m,
+       sum(aa.avg_drcnt_6m) avg_drcnt_6m,
+       sum(aa.avg_drcnt_2m) avg_drcnt_2m
+        from rep_retail_attrition aa, rtl_heirachy_view bb
+       where aa.rm_code = bb.staffno
+         and aa.segment_code = in_segcode
+       group by /*aa.rm_code,
+                aa.rm_name,
+                bb.hub,*/ upper(bb.cluster_name),
+                /*                bb.division_region,
+                */
+                aa.segment_code,
+                aa.sub_segment;
+  end prc_grpcluster_attrition_summ;
+
+  procedure prc_grpbrn_attrition_summ(in_segcode in varchar2,
+                                      ret        out sys_refcursor) is
+  begin
+    open ret for
+      select aa.branch_code,
+             aa.branch_name,
+             /*             bb.cluster_name cluster_name,
+             bb.division_region area,*/
+             aa.segment_code,
+             aa.sub_segment sub_segment,
+             sum(aa.avgbal_6m) avgbal_6m,
+             sum(aa.avgbal_2m) avgbal_2m,
+             sum(aa.avg_tur_6m) avg_tur_6m,
+             sum(aa.avg_turn_2m) avg_turn_2m,
+             sum(aa.avg_drcnt_6m) avg_drcnt_6m,
+             sum(aa.avg_drcnt_2m) avg_drcnt_2m
+        from rep_retail_attrition aa, rtl_heirachy_view bb
+       where aa.rm_code = bb.staffno
+         and aa.segment_code = in_segcode
+       group by aa.branch_code,
+                aa.branch_name,
+                /*                bb.cluster_name,
+                bb.division_region,*/
+                aa.segment_code,
+                aa.sub_segment;
+  end prc_grpbrn_attrition_summ;
+
+  procedure prc_attrition_cmo_view(in_branch in varchar2,
+                                   ret       out sys_refcursor) is
+  begin
+    open ret for
+      select bb.branch_code,
+             cc.branch_name,
+             aa.rm_code,
+             aa.rm_name,
+             /*             aa.segment_code,
+             aa.sub_segment sub_segment,*/
+             sum(aa.avgbal_6m) avgbal_6m,
+             sum(aa.avgbal_2m) avgbal_2m,
+             sum(aa.avg_tur_6m) avg_tur_6m,
+             sum(aa.avg_turn_2m) avg_turn_2m,
+             sum(aa.avg_drcnt_6m) avg_drcnt_6m,
+             sum(aa.avg_drcnt_2m) avg_drcnt_2m
+        from rep_retail_attrition aa,
+             rtl_heirachy_view    bb,
+             sttm_branch@fcubs_dr cc
+       where aa.rm_code = bb.staffno
+         and bb.branch_code = in_branch
+         and bb.branch_code = cc.branch_code
+       group by bb.branch_code, cc.branch_name, aa.rm_code, aa.rm_name /*,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      aa.segment_code,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      aa.sub_segment*/
+      ;
+  end prc_attrition_cmo_view;
+
+  procedure prc_attrition_clusterhd_view(in_cluster in varchar2,
+                                         ret        out sys_refcursor) is
+  begin
+    open ret for
+      select bb.cluster_name,
+             bb.branch_code,
+             cc.branch_name,
+             /*             aa.rm_code,
+             aa.rm_name,
+             aa.segment_code,
+             aa.sub_segment sub_segment,*/
+             sum(aa.avgbal_6m) avgbal_6m,
+             sum(aa.avgbal_2m) avgbal_2m,
+             sum(aa.avg_tur_6m) avg_tur_6m,
+             sum(aa.avg_turn_2m) avg_turn_2m,
+             sum(aa.avg_drcnt_6m) avg_drcnt_6m,
+             sum(aa.avg_drcnt_2m) avg_drcnt_2m
+        from rep_retail_attrition aa,
+             rtl_heirachy_view    bb,
+             sttm_branch@fcubs_dr cc
+       where aa.rm_code = bb.staffno
+         and bb.cluster_name = in_cluster
+         and bb.branch_code = cc.branch_code
+       group by bb.cluster_name, bb.branch_code, cc.branch_name /*,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      aa.rm_code,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      aa.rm_name,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      aa.segment_code,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      aa.sub_segment*/
+      ;
+  end prc_attrition_clusterhd_view;
+
+  procedure prc_attrition_cntc(in_st_amt  in number,
+                               in_end_amt in number,
+                               ret        out sys_refcursor) is
+  begin
+    open ret for
+    
+      select bb.*,
+             aa.segment_code,
+             aa.sub_segment,
+             aa.segment_name segment,
+             aa.rm_name
+        from rep_retail_attrition aa, rep_d_ppc bb
+       where aa.cust_no = bb.customer_no
+         and aa.avgbal_6m > in_st_amt
+         and aa.avgbal_6m <= in_end_amt;
+    /*      select aa.cust_no,
+          aa.customer_name,
+          aa.phone_number,
+          aa.email,
+          aa.avgbal_6m       avgbal_6m,
+          aa.avgbal_2m       avgbal_2m,
+          aa.avg_tur_6m      avg_tur_6m,
+          aa.avg_turn_2m     avg_turn_2m,
+          aa.avg_drcnt_6m    avg_drcnt_6m,
+          aa.avg_drcnt_2m    avg_drcnt_2m,
+          aa.rm_code,
+          bb.designation,
+          aa.rm_name,
+          aa.segment_code,
+          aa.sub_segment,
+          aa.branch_code,
+          aa.branch_name,
+          bb.hub,
+          bb.cluster_name,
+          bb.division_region,
+          bb.email           rm_email
+     from rep_retail_attrition aa, rtl_heirachy_view bb
+    where aa.rm_code = bb.staffno
+    and aa.avgbal_6m > in_st_amt
+    and aa.avgbal_6m <= in_end_amt;*/
+  end prc_attrition_cntc;
+
+  procedure prc_rtsx_callover(in_start_dt in date,
+                              in_end_dt   in date,
+                              ret         out sys_refcursor) is
+  begin
+    open ret for
+      select d.branch_code,
+             d.branch_name,
+             a.cust_ac_no,
+             a.cust_no,
+             a.ac_desc,
+             b.product_code,
+             b.contract_ref_no,
+             b.dr_amount,
+             b.payment_details1,
+             b.acc_with_instn || ' ' || c.bank_name beneficiary_bank,
+             b.ult_beneficiary1 || ' ' || b.ult_beneficiary2 beneficiary_details,
+             e.book_date,
+             b.dr_value_date,
+             b.cr_value_date,
+             ac_open_date,
+             bic_code,
+             bank_name,
+             f.rm_name,
+             f.bizseg_code,
+             f.sub_business_segment,
+             f.cbn_classification
+        from sttm_cust_account@fcubs_dr a,
+             fttb_contract_master@fcubs_dr b,
+             istm_bic_directory@fcubs_dr c,
+             sttm_branch@fcubs_dr d,
+             cstb_contract@fcubs_dr e,
+             (select aa.customer,
+                     aa.cust_mis_1 cbn_code,
+                     aa.cust_mis_2 bizseg_code,
+                     aa.cust_mis_4 rm_code,
+                     dd.code_desc cbn_classification,
+                     initcap(cc.code_desc) rm_name,
+                     bb.code_desc sub_business_segment
+                from mitm_customer_default@fcubs_dr aa,
+                     gltm_mis_code@fcubs_dr         bb,
+                     gltm_mis_code@fcubs_dr         cc,
+                     gltm_mis_code@fcubs_dr         dd
+               where aa.cust_mis_2 = bb.mis_code(+)
+                 and aa.cust_mis_4 = cc.mis_code(+)
+                 and aa.cust_mis_1 = dd.mis_code(+)
+                 and bb.mis_class(+) = 'BIZ_SEG'
+                 and cc.mis_class(+) = 'RM_CODE'
+                 and dd.mis_class(+) = 'CBN'
+                 and bb.active(+) = 'A'
+                 and cc.active(+) = 'A'
+                 and dd.active(+) = 'A') f
+       where a.cust_ac_no = b.dr_account
+         and b.acc_with_instn2 = c.bic_code(+)
+         and a.branch_code = d.branch_code
+         and a.cust_no = f.customer(+)
+         and b.product_code like 'RTX%'
+         and b.contract_ref_no = e.contract_ref_no
+         and b.version_no = e.latest_version_no
+         and b.event_seq_no = e.latest_event_seq_no(+)
+         and e.book_date between in_start_dt and in_end_dt;
+  end prc_rtsx_callover;
+
+  procedure prc_account_performance(in_account  in varchar2,
+                                    in_start_dt in date,
+                                    in_end_dt   in date,
+                                    ret         out sys_refcursor) is
+  
+  begin
+    open ret for
+      select a.period,
+             a.ac_no,
+             round(nvl(a.credit_turnover, 0), 2) credit_turnover,
+             a.credit_volume,
+             round(nvl(a.debit_turnover, 0), 2) debit_turnover,
+             a.debit_volume,
+             round(nvl(b.min_balance, e.acy_curr_balance), 2) min_balance,
+             round(nvl(c.max_balance, e.acy_curr_balance), 2) max_balance,
+             round(d.avg_cr_balance, 2) avg_cr_balance,
+             round(d.avg_dr_balance, 2) avg_dr_balance
+        from (select period,
+                     ac_no,
+                     sum(credit_turnover) credit_turnover,
+                     sum(credit_volume) credit_volume,
+                     sum(debit_turnover) debit_turnover,
+                     sum(debit_volume) debit_volume
+                from (select to_char(trn_dt, 'rrrr-mm') period,
+                             ac_no,
+                             sum(case
+                                   when drcr_ind = 'C' then
+                                    lcy_amount
+                                   else
+                                    0
+                                 end) credit_turnover,
+                             sum(case
+                                   when drcr_ind = 'C' then
+                                    1
+                                   else
+                                    0
+                                 end) credit_volume,
+                             sum(case
+                                   when drcr_ind = 'D' then
+                                    lcy_amount
+                                   else
+                                    0
+                                 end) debit_turnover,
+                             sum(case
+                                   when drcr_ind = 'D' then
+                                    1
+                                   else
+                                    0
+                                 end) debit_volume
+                        from acvw_all_ac_entries@fcubs_dr
+                       where ac_no in (in_account)
+                         and trn_dt between in_start_dt and in_end_dt
+                         and event not in ('DSBR',
+                                           'REVC',
+                                           'VAMI',
+                                           'ALIQ',
+                                           'MSTL',
+                                           'ROLL',
+                                           'ILIQ',
+                                           'LIQD')
+                         and trn_code not in
+                             ('MFQ',
+                              'PCH',
+                              'GEU',
+                              'HRO',
+                              'CRC',
+                              'CBC',
+                              'EBZ',
+                              'GCR',
+                              'SMS',
+                              'ASC',
+                              'CIF',
+                              'LOQ',
+                              'TMQ',
+                              'TPQ',
+                              'SER',
+                              'GDR',
+                              'CHE',
+                              'INT',
+                              'MCB',
+                              'REV',
+                              'DEP',
+                              'TRC',
+                              'MMC', /*'HRD',*/
+                              'ILQ',
+                              'OFF',
+                              'RFD', /*'FOD',*/
+                              'RNF',
+                              'BTF',
+                              'TAX',
+                              'RPC',
+                              'GMO',
+                              'BTF',
+                              'OFF',
+                              'RFD',
+                              'FBC',
+                              'OFC' /*,'FOD'*/)
+                       group by trn_dt, ac_no)
+               group by period, ac_no) a,
+             (select period, account_no, balances min_balance
+                from (select to_char(bkg_date, 'rrrr-mm') period,
+                             aa.account account_no,
+                             aa.acy_closing_bal balances,
+                             row_number() over(partition by aa.account, to_char(bkg_date, 'rrrr-mm') order by acy_closing_bal asc) rnk
+                        from actb_accbal_history@fcubs_dr aa
+                       where aa.account in (in_account)
+                         and bkg_date between in_start_dt and in_end_dt)
+               where rnk = 1) b,
+             (select period, account_no, balances max_balance
+                from (select to_char(bkg_date, 'rrrr-mm') period,
+                             aa.account account_no,
+                             aa.acy_closing_bal balances,
+                             row_number() over(partition by aa.account, to_char(bkg_date, 'rrrr-mm') order by acy_closing_bal desc) rnk
+                        from actb_accbal_history@fcubs_dr aa
+                       where aa.account in (in_account)
+                         and bkg_date between in_start_dt and in_end_dt)
+               where rnk = 1) c,
+             (select period,
+                     account_no,
+                     avg(avg_cr_balance) avg_cr_balance,
+                     avg(avg_dr_balance) avg_dr_balance
+                from (select to_char(bkg_date, 'rrrr-mm') period,
+                             aa.account account_no,
+                             avg(case
+                                   when aa.acy_closing_bal > 0 then
+                                    aa.acy_closing_bal
+                                   else
+                                    null
+                                 end) avg_cr_balance,
+                             avg(case
+                                   when aa.acy_closing_bal < 0 then
+                                    aa.acy_closing_bal
+                                   else
+                                    null
+                                 end) avg_dr_balance
+                        from actb_accbal_history@fcubs_dr aa
+                       where aa.account in (in_account)
+                         and bkg_date between in_start_dt and in_end_dt
+                       group by bkg_date, aa.account)
+               group by period, account_no
+               order by 1) d,
+             sttm_cust_account@fcubs_dr e
+       where a.ac_no = b.account_no(+)
+         and a.period = b.period(+)
+         and a.ac_no = c.account_no(+)
+         and a.period = c.period(+)
+         and a.ac_no = d.account_no(+)
+         and a.period = d.period(+)
+         and a.ac_no = e.cust_ac_no;
+  end prc_account_performance;
+
+  procedure prc_account_all_performance(in_account  in varchar2,
+                                        in_start_dt in date,
+                                        in_end_dt   in date,
+                                        ret         out sys_refcursor) is
+  
+  begin
+    open ret for
+      select a.period,
+             a.ac_no,
+             round(nvl(a.credit_turnover, 0), 2) credit_turnover,
+             a.credit_volume,
+             round(nvl(a.debit_turnover, 0), 2) debit_turnover,
+             a.debit_volume,
+             round(nvl(b.min_balance, e.acy_curr_balance), 2) min_balance,
+             round(nvl(c.max_balance, e.acy_curr_balance), 2) max_balance,
+             round(d.avg_cr_balance, 2) avg_cr_balance,
+             round(d.avg_dr_balance, 2) avg_dr_balance
+        from (select period,
+                     ac_no,
+                     sum(credit_turnover) credit_turnover,
+                     sum(credit_volume) credit_volume,
+                     sum(debit_turnover) debit_turnover,
+                     sum(debit_volume) debit_volume
+                from (select to_char(trn_dt, 'rrrr-mm') period,
+                             ac_no,
+                             sum(case
+                                   when drcr_ind = 'C' then
+                                    lcy_amount
+                                   else
+                                    0
+                                 end) credit_turnover,
+                             sum(case
+                                   when drcr_ind = 'C' then
+                                    1
+                                   else
+                                    0
+                                 end) credit_volume,
+                             sum(case
+                                   when drcr_ind = 'D' then
+                                    lcy_amount
+                                   else
+                                    0
+                                 end) debit_turnover,
+                             sum(case
+                                   when drcr_ind = 'D' then
+                                    1
+                                   else
+                                    0
+                                 end) debit_volume
+                        from acvw_all_ac_entries@fcubs_dr
+                       where ac_no in (in_account)
+                         and trn_dt between in_start_dt and in_end_dt
+                         and event not in ('DSBR',
+                                           'REVC',
+                                           'VAMI',
+                                           'ALIQ',
+                                           'MSTL',
+                                           'ROLL',
+                                           'ILIQ',
+                                           'LIQD')
+                      /*   and trn_code not in
+                      ('MFQ',
+                       'PCH',
+                       'GEU',
+                       'HRO',
+                       'CRC',
+                       'CBC',
+                       'EBZ',
+                       'GCR',
+                       'SMS',
+                       'ASC',
+                       'CIF',
+                       'LOQ',
+                       'TMQ',
+                       'TPQ',
+                       'SER',
+                       'GDR',
+                       'CHE',
+                       'INT',
+                       'MCB',
+                       'REV',
+                       'DEP',
+                       'TRC',
+                       'MMC', \*'HRD',*\
+                       'ILQ',
+                       'OFF',
+                       'RFD', \*'FOD',*\
+                       'RNF',
+                       'BTF',
+                       'TAX',
+                       'RPC',
+                       'GMO',
+                       'BTF',
+                       'OFF',
+                       'RFD','FBC','OFC' \*,'FOD'*\)*/
+                       group by trn_dt, ac_no)
+               group by period, ac_no) a,
+             (select period, account_no, balances min_balance
+                from (select to_char(bkg_date, 'rrrr-mm') period,
+                             aa.account account_no,
+                             aa.acy_closing_bal balances,
+                             row_number() over(partition by aa.account, to_char(bkg_date, 'rrrr-mm') order by acy_closing_bal asc) rnk
+                        from actb_accbal_history@fcubs_dr aa
+                       where aa.account in (in_account)
+                         and bkg_date between in_start_dt and in_end_dt)
+               where rnk = 1) b,
+             (select period, account_no, balances max_balance
+                from (select to_char(bkg_date, 'rrrr-mm') period,
+                             aa.account account_no,
+                             aa.acy_closing_bal balances,
+                             row_number() over(partition by aa.account, to_char(bkg_date, 'rrrr-mm') order by acy_closing_bal desc) rnk
+                        from actb_accbal_history@fcubs_dr aa
+                       where aa.account in (in_account)
+                         and bkg_date between in_start_dt and in_end_dt)
+               where rnk = 1) c,
+             (select period,
+                     account_no,
+                     avg(avg_cr_balance) avg_cr_balance,
+                     avg(avg_dr_balance) avg_dr_balance
+                from (select to_char(bkg_date, 'rrrr-mm') period,
+                             aa.account account_no,
+                             avg(case
+                                   when aa.acy_closing_bal > 0 then
+                                    aa.acy_closing_bal
+                                   else
+                                    null
+                                 end) avg_cr_balance,
+                             avg(case
+                                   when aa.acy_closing_bal < 0 then
+                                    aa.acy_closing_bal
+                                   else
+                                    null
+                                 end) avg_dr_balance
+                        from actb_accbal_history@fcubs_dr aa
+                       where aa.account in (in_account)
+                         and bkg_date between in_start_dt and in_end_dt
+                       group by bkg_date, aa.account)
+               group by period, account_no
+               order by 1) d,
+             sttm_cust_account@fcubs_dr e
+       where a.ac_no = b.account_no(+)
+         and a.period = b.period(+)
+         and a.ac_no = c.account_no(+)
+         and a.period = c.period(+)
+         and a.ac_no = d.account_no(+)
+         and a.period = d.period(+)
+         and a.ac_no = e.cust_ac_no;
+  end prc_account_all_performance;
+
+  procedure prc_reactivated_accts(p_startdt in date,
+                                  p_enddt   in date,
+                                  ret       out sys_refcursor) is
+  
+  begin
+    open ret for
+      select e.region,
+             b.branch_code,
+             c.branch_name,
+             d.ccy,
+             d.account_class,
+             d.cust_no customer_id,
+             g.description,
+             a.cust_ac_no,
+             nvl(mobile_number, telephone) mobile_number,
+             e_mail,
+             d.ac_desc,
+             a.date_change,
+             d.acy_curr_Balance,
+             d.lcy_curr_balance,
+             a.date_change change_date,
+             case
+               when d.date_last_cr > d.date_last_dr then
+                d.date_last_cr
+               else
+                d.date_last_dr
+             end date_last_cr_dr_bf_rctvtn,
+             trunc(sysdate) - (case
+                                 when d.date_last_cr > d.date_last_dr then
+                                  d.date_last_cr
+                                 else
+                                  d.date_last_dr
+                               end) age_in_days,
+             d.date_last_dr,
+             d.date_last_cr,
+             b.maker_id,
+             b.checker_id,
+             y.sub_segment,
+             f.cust_mis_2 seg_code,
+             (select code_desc
+                from gltm_mis_code@fcubs_dr
+               where mis_class = 'BIZ_SEG'
+                 and mis_code = f.cust_mis_2) Business_Seg,
+             f.cust_mis_4 rm_code,
+             (select code_desc
+                from gltm_mis_code@fcubs_dr
+               where mis_class = 'RM_CODE'
+                 and mis_code = f.cust_mis_4) rm_name
+        from (SELECT MAX(Status_Change_Date) date_change,
+                     max(seq_no) seq_no,
+                     Cust_Ac_No
+                FROM Sttm_Ac_Stat_Change@fcubs_dr -- Where cust_ac_no = '0076192932'
+               where from_dormant = 'Y'
+                 and dormant = 'N'
+               group by Cust_Ac_No) a,
+             Sttm_Ac_Stat_Change@fcubs_dr b,
+             sttm_branch@fcubs_dr c,
+             sttm_cust_account@fcubs_dr d,
+             sttm_account_class@fcubs_dr g,
+             ubn_brn_region@fcubs_dr e,
+             mitm_customer_default@fcubs_dr f,
+             fcubslive.sttm_cust_personal@fcubs_dr z,
+             (select field_val_1 customer_bvn,
+                     field_val_16 sub_segment,
+                     substr(rec_key, 1, 9) cust_no
+                from cstm_function_userdef_fields@fcubs_dr
+               WHERE FUNCTION_ID = 'STDCIF') y
+       where a.date_change = b.status_change_date
+         and a.seq_no = b.seq_no
+         and a.Cust_Ac_No = b.cust_ac_no
+         and b.branch_code = c.branch_code
+         and b.cust_ac_no = d.cust_ac_no
+         and d.account_class = g.account_class
+         and b.branch_code = e.new_branch_code(+)
+         and d.cust_no = f.customer(+)
+         and d.cust_no = z.customer_no(+)
+         and d.cust_no = y.cust_no(+)
+         and a.date_change between p_startdt AND p_enddt
+      union
+      select e.region,
+             d.branch_code,
+             e.branch_name,
+             d.ccy,
+             d.account_class,
+             d.cust_no customer_id,
+             g.description,
+             a.cust_ac_no,
+             nvl(mobile_number, telephone) mobile_number,
+             e_mail,
+             d.ac_desc,
+             a.status_change_date,
+             d.acy_curr_Balance,
+             d.lcy_curr_balance,
+             a.status_change_date change_date,
+             a.date_last_cr_dr date_last_cr_dr_bf_rctvtn,
+             a.variance age_in_days,
+             d.date_last_dr,
+             d.date_last_cr,
+             d.maker_id,
+             d.checker_id,
+             y.sub_segment,
+             f.cust_mis_2 seg_code,
+             (select code_desc
+                from gltm_mis_code@fcubs_dr
+               where mis_class = 'BIZ_SEG'
+                 and mis_code = f.cust_mis_2) Business_Seg,
+             f.cust_mis_4 rm_code,
+             (select code_desc
+                from gltm_mis_code@fcubs_dr
+               where mis_class = 'RM_CODE'
+                 and mis_code = f.cust_mis_4) rm_name
+        from (select cust_ac_no,
+                     status_change_date,
+                     active_status,
+                     case
+                       when DATE_LAST_CR > DATE_LAST_DR then
+                        DATE_LAST_CR
+                       else
+                        nvl(DATE_LAST_DR, ac_open_date)
+                     end date_last_cr_dr,
+                     trunc(sysdate) - (case
+                                         when DATE_LAST_CR > DATE_LAST_DR then
+                                          DATE_LAST_CR
+                                         else
+                                          nvl(DATE_LAST_DR, ac_open_date)
+                                       end) variance
+              
+                from (select ac_open_date,
+                             MAX(DATE_LAST_dR) DATE_LAST_dR,
+                             max(date_last_cr) DATE_LAST_cR,
+                             a.cust_ac_no,
+                             b.status_change_date,
+                             b.active_status
+                        from fcubslive.sttm_ac_stat_active_master@fcubs_dr a,
+                             fcubslive.sttm_acstat_change_status@fcubs_dr  b
+                       where a.cust_ac_no = b.cust_ac_no
+                         and a.account_class like 'SA%'
+                         and a.active_status = 'Y'
+                         and b.active_status = 'Y'
+                         AND AC_STAT_DORMANT = 'N'
+                       group by a.cust_ac_no,
+                                b.status_change_date,
+                                ac_open_date,
+                                b.active_status)) a,
+             sttm_cust_account@fcubs_dr d,
+             sttm_account_class@fcubs_dr g,
+             ubn_brn_region@fcubs_dr e,
+             mitm_customer_default@fcubs_dr f,
+             fcubslive.sttm_cust_personal@fcubs_dr z,
+             (select field_val_1 customer_bvn,
+                     field_val_16 sub_segment,
+                     substr(rec_key, 1, 9) cust_no
+                from cstm_function_userdef_fields@fcubs_dr
+               WHERE FUNCTION_ID = 'STDCIF') y
+       where a.Cust_Ac_No = d.cust_ac_no
+         and d.account_class = g.account_class
+         and a.active_status = 'Y'
+         and d.branch_code = e.new_branch_code(+)
+         and d.cust_no = f.customer(+)
+         and d.cust_no = z.customer_no(+)
+         and d.cust_no = y.cust_no(+)
+         and a.variance > 540
+         and a.status_change_date between p_startdt AND p_enddt;
+  end prc_reactivated_accts;
+
+  procedure prc_account_opened_dtls(in_start_dt in date,
+                                    in_end_dt   in date,
+                                    ret         out sys_refcursor) is
+  begin
+    open ret for
+      select a.branch_code,
+             b.branch_name,
+             a.cust_no,
+             nvl(c.customer_name1, c.full_name) customer_name,
+             a.ccy,
+             a.cust_ac_no account_no,
+             a.ac_desc account_name,
+             ----fn_get_acctstat(a.cust_ac_no) account_status,
+             a.ac_open_date acct_open_date,
+             e.date_of_birth,
+             a.account_class product_code,
+             d.description product_name,
+             e.d_address1 || ' ' || e.d_address2 || ' ' || e.d_address3 customer_address,
+             e.telephone,
+             lower(e.e_mail) email,
+             g.ed_emp_name employer_name,
+             a.acy_curr_balance,
+             a.lcy_curr_balance,
+             a.min_reqd_bal,
+             a.date_last_cr,
+             a.date_last_dr,
+             a.maker_id,
+             a.checker_id,
+             ff.cbn_sec_cd,
+             ff.cbn_sector_descr,
+             ff.biz_seg_cd,
+             ff.business_segment,
+             case
+               when substr(ff.biz_seg_cd, 1, 3) = 'COM' then
+                'Commercial'
+               when substr(ff.biz_seg_cd, 1, 3) in ('COR', 'TRE') then
+                'Corporate'
+               when (substr(ff.biz_seg_cd, 1, 1) = 'R' or
+                    substr(ff.biz_seg_cd, 1, 3) = 'SME') then
+                'Retail'
+               else
+                'No Segment'
+             end as biz_seg_class,
+             ff.rm_code,
+             ff.rm_name,
+             ff.comp_mis_1 int_code,
+             ff.introducer_name,
+             ff.comp_mis_2 ref_code,
+             ff.referral_name
+        from sttm_cust_account@fcubs_dr a,
+             sttm_branch@fcubs_dr b,
+             sttm_customer@fcubs_dr c,
+             sttm_account_class@fcubs_dr d,
+             sttm_cust_personal@fcubs_dr e,
+             (select a.customer,
+                     a.cust_mis_1 cbn_sec_cd,
+                     b.code_desc  cbn_sector_descr,
+                     a.cust_mis_2 biz_seg_cd,
+                     c.code_desc  business_segment,
+                     a.cust_mis_4 rm_code,
+                     d.code_desc  rm_name,
+                     a.comp_mis_1,
+                     e.code_desc  introducer_name,
+                     a.comp_mis_2,
+                     f.code_desc  referral_name
+                from mitm_customer_default@fcubs_dr a,
+                     (select *
+                        from gltm_mis_code
+                       where mis_class = 'CBN'
+                         and active = 'A') b,
+                     (select *
+                        from gltm_mis_code
+                       where mis_class = 'BIZ_SEG'
+                         and active = 'A') c,
+                     (select *
+                        from gltm_mis_code
+                       where mis_class = 'RM_CODE'
+                         and active = 'A') d,
+                     (select *
+                        from gltm_mis_code
+                       where mis_class = 'INT_CODE'
+                         and active = 'A') e,
+                     (select *
+                        from gltm_mis_code
+                       where mis_class = 'REFE_CODE'
+                         and active = 'A') f
+               where a.cust_mis_1 = b.mis_code(+)
+                 and a.cust_mis_2 = c.mis_code(+)
+                 and a.cust_mis_4 = d.mis_code(+)
+                 and a.comp_mis_1 = e.mis_code(+)
+                 and a.comp_mis_2 = f.mis_code(+)) ff,
+             (select *
+                from (select itemindex,
+                             account_no,
+                             ed_emp_name,
+                             row_number() over(partition by account_no order by itemindex desc) rnk
+                        from ubnprodcab.ubn_ao_exttable2@omniflow
+                       where curr_wsname = 'EXIT'
+                         and ed_emp_name is not null)
+               where rnk = 1) g
+       where a.branch_code = b.branch_code
+         and a.cust_no = c.customer_no
+         and a.auth_stat = 'A'
+         and c.customer_no = e.customer_no(+)
+         and a.cust_no = ff.customer(+)
+         and d.auth_stat = 'A'
+         and c.auth_stat = 'A'
+         and b.auth_stat = 'A'
+         and a.cust_ac_no = g.account_no(+)
+         and a.record_stat = 'O'
+         and a.account_class = d.account_class
+         and a.ac_open_date between in_start_dt and in_end_dt;
+  end prc_account_opened_dtls;
+
+  procedure prc_collect_ac_bals(ret out sys_refcursor) is
+  begin
+    open ret for
+      select a.branch_code,
+             b.branch_name,
+             a.account_class,
+             c.description,
+             a.cust_ac_no,
+             a.ccy,
+             a.ac_desc,
+             a.acy_opening_bal,
+             a.acy_curr_balance
+        from fcubslive.sttm_cust_account@fcubs_dr  a,
+             fcubslive.sttm_branch@fcubs_dr        b,
+             fcubslive.sttm_account_class@fcubs_dr c
+       where a.branch_code = b.branch_code
+         and a.account_class = c.account_class
+         and b.auth_stat = 'A'
+         and a.auth_stat = 'A'
+         and a.record_stat = 'O'
+         and a.account_class in ('CA_012',
+                                 'CA_022',
+                                 'CA_023',
+                                 'CA_021',
+                                 'CA_912',
+                                 'CA_026',
+                                 'CT_001',
+                                 'CT_003',
+                                 'CT_004');
+  end prc_collect_ac_bals;
+
+  procedure prc_neft_rpt(in_date in date, ret out sys_refcursor) is
+  begin
+    open ret for
+      select distinct a.branch_code,
+                      d.branch_name,
+                      orig_branch_code,
+                      a.branch_batch_id,
+                      a.user_id,
+                      a.authorizer_id,
+                      a.created_date,
+                      a.authorized_date,
+                      b.payer_name,
+                      sender_account_no,
+                      c.clg_bank_name nam_bank,
+                      beneficiary_acct_no,
+                      beneficiary,
+                      amount / 100 amount,
+                      total_amount,
+                      total_items,
+                      trans_id,
+                      processing_mode,
+                      decode(a.status,
+                             '3',
+                             'Deleted',
+                             '1',
+                             'New',
+                             '8',
+                             'Awaiting Auth',
+                             '5',
+                             'Approved',
+                             '9',
+                             'Transmitted') status,
+                      a.transaction_details,
+                      authorizer_comments,
+                      decode(is_returned, '0', 'No', 'Yes') returned
+        from apps.oneft_transaction_header@fcubs_dr a,
+             apps.oneft_transactions@fcubs_dr       b,
+             detm_clg_bank_code@fcubs_dr            c,
+             sttm_branch@fcubs_dr                   d
+       where a.header_id = b.header_id
+         and c.auth_stat = 'A'
+         and d.auth_stat = 'A'
+         and substr(payor_bank_sort_code, 0, 3) = clg_bank_code
+         and (trunc(a.created_date) >= in_date or
+             trunc(a.authorized_date) >= in_date)
+         and (trunc(a.created_date) <= in_date or
+             trunc(a.authorized_date) <= in_date)
+         and a.branch_code = d.branch_code;
+  end prc_neft_rpt;
+
+  procedure prc_mastercard_hold(ret out sys_refcursor) is
+  begin
+    open ret for
+      select a.branch,
+             a.effective_date,
+             account account_no,
+             b.acq_ins_id,
+             b.fwd_ins_id,
+             b.rrn,
+             b.stan,
+             b.term_id,
+             b.pre_auth_seq_no,
+             a.expiry_date,
+             amount,
+             a.hold_code,
+             a.auth_stat,
+             a.remarks,
+             a.maker_id,
+             a.checker_id,
+             a.checker_dt_stamp,
+             a.amount_block_no
+        from fcubslive.catm_amount_blocks@fcubs_dr a,
+             fcubslive.swtv_txn_log@fcubs_dr       b
+       where a.effective_date >= '01Jan2019'
+         and a.account = b.from_acc
+         and a.amount_block_no = b.amount_block_no
+         and record_stat = 'O';
+    --order by 1, 2;
+  end prc_mastercard_hold;
+
+  procedure prc_mc_issuance(in_start_dt in date,
+                            in_end_dt   in date,
+                            /*   in_branch   in varchar2,*/
+                            ret out sys_refcursor) is
+  begin
+    open ret for
+      select a.issuing_branch,
+             d.branch_name     issuing_branch_name,
+             a.payable_branch,
+             c.branch_name     payable_branch_name,
+             a.instr_amount,
+             a.instr_date,
+             a.instr_no,
+             a.ac_no,
+             a.instr_stat,
+             b.ac_gl_desc      account_name,
+             a.benef_name,
+             a.instr_ccy,
+             ac_branch,
+             a.trn_dt,
+             a.maker_id,
+             a.maker_dt_stamp,
+             a.checker_id,
+             a.expiry_date,
+             a.ben_account,
+             a.narrative,
+             a.product_code,
+             a.rel_customer,
+             a.contract_ref_no,
+             a.xref
+        from fcubslive.istm_instr_txn@fcubs_dr a,
+             fcubslive.sttb_account@fcubs_dr   b,
+             sttm_branch@fcubs_dr              c,
+             sttm_branch@fcubs_dr              d
+       where a.ac_no = b.ac_gl_no
+         and a.payable_branch = c.branch_code
+         and a.issuing_branch = d.branch_code
+         and instr_stat = 'INIT'
+         and a.auth_stat = 'A'
+         and b.auth_stat = 'A'
+         and c.auth_stat = 'A'
+         and d.auth_stat = 'A'
+         and a.trn_dt between in_start_dt and in_end_dt
+      /*and (a.issuing_branch = in_branch or in_branch is null)*/
+      ;
+  end prc_mc_issuance;
+
+  procedure prc_umobile_users(in_start_dt in date,
+                              in_end_dt   in date,
+                              in_status   in char,
+                              in_active   in char,
+                              ret         out sys_refcursor) is
+  begin
+    open ret for
+      select cc.region,
+             aa.branch          branch_code,
+             cc.branch_name,
+             aa.card_num        cust_ac_no,
+             bb.account_class,
+             dd.description     ac_class_desc,
+             aa.firstname,
+             aa.lastname,
+             bb.ac_desc,
+             aa.phone,
+             aa.activation_flag,
+             aa.active,
+             aa.created
+        from mb_e_umobilecardinf aa,
+             sttm_cust_account@fcubs_dr bb,
+             (select distinct aa.region,
+                              aa.new_branch_code branch_code,
+                              bb.branch_name
+                from ubn_brn_region aa, sttm_branch@fcubs_dr bb
+               where aa.new_branch_code = bb.branch_code) cc,
+             sttm_account_class@fcubs_dr dd
+       where aa.card_num = bb.cust_ac_no
+         and aa.branch = cc.branch_code
+         and bb.account_class = dd.account_class
+         and trunc(aa.created) between in_start_dt and in_end_dt
+         and (aa.active = in_status or in_status is null)
+         and (aa.activation_flag = in_active or in_active is null);
+  end prc_umobile_users;
+
+  procedure prc_clr_rpt(in_date in date,  ret out sys_refcursor) is
+    
+  
+    v_date date;
+  
+   
+  begin
+    
+   
+    select prev_working_day
+      into v_date
+      from sttm_dates@fcubs_dr
+     where branch_code = '000';
+     
+    if in_date >= v_date then
+      open ret for
+      /* select aa.* from crm_clr_report_new aa*/
+        select distinct upper(ee.region) region,
+                        upper(ee.location) location,
+                        aa.*,
+                        case
+                          when aa.sources = 'CL' then
+                           nvl(aa.principal_balance_lcy, 0) +
+                           nvl(ff.total_int_recvable_lcy, 0)
+                          else
+                           nvl(aa.total_balance, 0)
+                        end adj_total_balance,
+                        nvl(ff.total_int_recvable_acy, 0) total_int_recvable_acy,
+                        nvl(ff.total_int_recvable_lcy, 0) total_int_recvable_lcy,
+                        ff.intgl,
+                        bb.exposure_type exposure_type,
+                        bb.subsector_cbn subsector_cbn,
+                        bb.sector_cbn sector_cbn,
+                        bb.business_lines_cbn business_lines_cbn,
+                        bb.product_type_cbn product_type_cbn,
+                        aa.customer_name groupname,
+                        nvl(dd.insider_related, 'NO') insider_related,gg.pay_advance,
+                         ' ' ratings_origination,
+                          case when aa.major_biz_segment not in ('Corporate')  
+                           then ee.sbu_region
+                             else aa.major_biz_segment end sbu_region,
+                         ee.bm_code,
+                         ee.branch_manager,  
+scorepoint_dpd, 
+scorepoint_pastdt, 
+scorepoint_maxdpd, 
+scorepoint_nopaymentcnt, 
+scorepoint_tenor,  
+scorepoint_outs_orig_tenor, 
+scorepoint_product, 
+scorepoint_pdamt_outsbal, 
+scorepoint_pdamt_origlnlimit,
+ total_score
+          from crm_clr_report_new      aa,
+               crm_prodsector_map      bb,
+               crm_insider_relations   dd,
+               crm_branch_region       ee,
+               rep_int_receivable_cust ff,
+               crm_pay_advance gg,
+                 Clr_scoring rr
+         where aa.product = bb.product(+)
+           and aa.cust_no = dd.cust_id(+)
+           and aa.branch_code = ee.branch_code(+)
+           and aa.account_number = ff.loan_accno(+)
+           and aa.settlement_account = gg.cust_ac_no(+)
+             and aa.account_number = rr.account_number(+)
+           and upper(aa.major_biz_segment) = 'RETAIL'
+           and dd.status(+) not in ('Ex-staff')
+           --and ((upper(aa.MAJOR_BIZ_SEGMENT) in (bis_seg)) or (bis_seg in ('ALL'))) ---------24/12/2020 major bus_sgt select
+
+        union all
+        select distinct upper(ee.region) region,
+                        upper(ee.location) location,
+                        aa.*,
+                        case
+                          when aa.sources = 'CL' then
+                           nvl(aa.principal_balance_lcy, 0) +
+                           nvl(ff.total_int_recvable_lcy, 0)
+                          else
+                           nvl(aa.total_balance, 0)
+                        end adj_total_balance,
+                        nvl(ff.total_int_recvable_acy, 0) total_int_recvable_acy,
+                        nvl(ff.total_int_recvable_lcy, 0) total_int_recvable_lcy,
+                        ff.intgl,
+                        cc.exposure_type exposure_type,
+                        cc.subsector_cbn subsector_cbn,
+                        cc.sector_cbn sector_cbn,
+                        cc.business_lines_cbn business_lines_cbn,
+                        cc.product_type_cbn product_type_cbn,
+                        nvl(cc.groupname, aa.customer_name) groupname,
+                        nvl(dd.insider_related, 'NO') insider_related, gg.pay_advance,
+                         cc.ratings_origination,    
+                          case when aa.major_biz_segment not in ('Corporate') 
+                           then ee.sbu_region
+                             else aa.major_biz_segment end sbu_region,
+                         ee.bm_code,
+                         ee.branch_manager,            
+scorepoint_dpd, 
+scorepoint_pastdt, 
+scorepoint_maxdpd, 
+scorepoint_nopaymentcnt, 
+scorepoint_tenor, 
+scorepoint_outs_orig_tenor, 
+scorepoint_product, 
+scorepoint_pdamt_outsbal, 
+scorepoint_pdamt_origlnlimit,
+ total_score
+          from crm_clr_report_new      aa,
+               crm_corpsme_sector_map  cc,
+               crm_insider_relations   dd,
+               crm_branch_region       ee,
+               rep_int_receivable_cust ff,
+               crm_pay_advance gg,
+                Clr_scoring rr
+         where aa.cust_no = cc.cust_no(+)
+           and aa.cust_no = dd.cust_id(+)
+           and aa.branch_code = ee.branch_code(+)
+           and aa.account_number = ff.loan_accno(+)
+           and aa.settlement_account = gg.cust_ac_no(+)
+           and aa.account_number = rr.account_number(+)
+           and (upper(aa.major_biz_segment) != 'RETAIL' or aa.major_biz_segment is null)
+           and dd.status(+) not in ('Ex-staff')
+         --  and ((upper(aa.MAJOR_BIZ_SEGMENT) in (bis_seg)) or (bis_seg in ('ALL'))) ---------24/12/2020 major bus_sgt select
+;
+    else
+      open ret for
+        select distinct upper(ee.region) region,
+                        upper(ee.location) location,
+                        aa.*,
+                        case
+                          when aa.sources = 'CL' then
+                           nvl(aa.principal_balance_lcy, 0) +
+                           nvl(ff.total_int_recvable_lcy, 0)
+                          else
+                           nvl(aa.total_balance, 0)
+                        end adj_total_balance,
+                        nvl(ff.total_int_recvable_acy, 0) total_int_recvable_acy,
+                        nvl(ff.total_int_recvable_lcy, 0) total_int_recvable_lcy,
+                        ff.intgl,
+                        bb.exposure_type exposure_type,
+                        bb.subsector_cbn subsector_cbn,
+                        bb.sector_cbn sector_cbn,
+                        bb.business_lines_cbn business_lines_cbn,
+                        bb.product_type_cbn product_type_cbn,
+                        aa.customer_name groupname,
+                        nvl(dd.insider_related, 'NO') insider_related, gg.pay_advance,
+                         ' '  ratings_origination,
+                          case when aa.major_biz_segment not in ('Corporate')   
+                           then ee.sbu_region
+                             else aa.major_biz_segment end sbu_region,
+                         ee.bm_code,
+                         ee.branch_manager,  
+scorepoint_dpd, 
+scorepoint_pastdt, 
+scorepoint_maxdpd, 
+scorepoint_nopaymentcnt, 
+scorepoint_tenor,  
+scorepoint_outs_orig_tenor, 
+scorepoint_product, 
+scorepoint_pdamt_outsbal, 
+scorepoint_pdamt_origlnlimit,
+ total_score
+          from crm_clr_report_hist          aa,
+               crm_prodsector_map           bb,
+               crm_insider_relations        dd,
+               crm_branch_region            ee,
+               rep_int_receivable_cust_hist ff,
+               crm_pay_advance gg,
+                 Clr_scoring rr
+         where aa.product = bb.product(+)
+           and aa.cust_no = dd.cust_id(+)
+           and aa.branch_code = ee.branch_code(+)
+           and aa.account_number = ff.loan_accno(+)
+           and aa.settlement_account = gg.cust_ac_no(+)
+              and aa.account_number = rr.account_number(+)
+           and upper(aa.major_biz_segment) = 'RETAIL'
+           and dd.status(+) not in ('Ex-staff')
+           and aa.reference_date = in_date
+           and ff.reference_date(+) = in_date
+        --   and ((upper(aa.MAJOR_BIZ_SEGMENT) in (bis_seg)) or (bis_seg in ('ALL'))) ---------24/12/2020 major bus_sgt select
+
+        union all
+        select distinct upper(ee.region) region,
+                        upper(ee.location) location,
+                        aa.*,
+                        case
+                          when aa.sources = 'CL' then
+                           nvl(aa.principal_balance_lcy, 0) +
+                           nvl(ff.total_int_recvable_lcy, 0)
+                          else
+                           nvl(aa.total_balance, 0)
+                        end adj_total_balance,
+                        nvl(ff.total_int_recvable_acy, 0) total_int_recvable_acy,
+                        nvl(ff.total_int_recvable_lcy, 0) total_int_recvable_lcy,
+                        ff.intgl,
+                        cc.exposure_type exposure_type,
+                        cc.subsector_cbn subsector_cbn,
+                        cc.sector_cbn sector_cbn,
+                        cc.business_lines_cbn business_lines_cbn,
+                        cc.product_type_cbn product_type_cbn,
+                        nvl(cc.groupname, aa.customer_name) groupname,
+                        nvl(dd.insider_related, 'NO') insider_related, gg.pay_advance,
+                        cc.ratings_origination,
+                         case when aa.major_biz_segment not in ('Corporate')  
+                           then ee.sbu_region
+                             else aa.major_biz_segment end sbu_region,
+                         ee.bm_code,
+                         ee.branch_manager,  
+scorepoint_dpd, 
+scorepoint_pastdt, 
+scorepoint_maxdpd, 
+scorepoint_nopaymentcnt, 
+scorepoint_tenor, 
+scorepoint_outs_orig_tenor, 
+scorepoint_product, 
+scorepoint_pdamt_outsbal, 
+scorepoint_pdamt_origlnlimit,
+ total_score
+          from crm_clr_report_hist          aa,
+               crm_corpsme_sector_map       cc,
+               crm_insider_relations        dd,
+               crm_branch_region            ee,
+               rep_int_receivable_cust_hist ff,
+               crm_pay_advance gg ,
+                Clr_scoring rr
+         where aa.cust_no = cc.cust_no(+)
+           and aa.cust_no = dd.cust_id(+)
+           and aa.branch_code = ee.branch_code(+)
+           and aa.account_number = ff.loan_accno(+)
+           and aa.settlement_account = gg.cust_ac_no(+)
+              and aa.account_number = rr.account_number(+)
+           and (upper(aa.major_biz_segment) != 'RETAIL' or aa.major_biz_segment is null)
+           and dd.status(+) not in ('Ex-staff')
+           and aa.reference_date = in_date
+           and ff.reference_date(+) = in_date
+         --  and ((upper(aa.MAJOR_BIZ_SEGMENT) in (bis_seg)) or (bis_seg in ('ALL'))) ---------24/12/2020 major bus_sgt select
+;
+    end if;
+  end prc_clr_rpt;
+  
+  
+  procedure prc_clr_ret_rpt(ret out sys_refcursor) is
+  begin
+    open ret for
+    
+      select distinct upper(ee.region) region,
+                      upper(ee.location) location,
+                      aa.*,
+                      case
+                        when aa.sources = 'CL' then
+                         nvl(aa.principal_balance_lcy, 0) +
+                         nvl(ff.total_int_recvable_lcy, 0)
+                        else
+                         nvl(aa.total_balance, 0)
+                      end adj_total_balance,
+                      nvl(ff.total_int_recvable_acy, 0) total_int_recvable_acy,
+                      nvl(ff.total_int_recvable_lcy, 0) total_int_recvable_lcy,
+                      ff.intgl,
+                      bb.exposure_type exposure_type,
+                      bb.subsector_cbn subsector_cbn,
+                      bb.sector_cbn sector_cbn,
+                      bb.business_lines_cbn business_lines_cbn,
+                      bb.product_type_cbn product_type_cbn,
+                      aa.customer_name groupname,
+                      nvl(dd.insider_related, 'NO') insider_related,
+                       case when aa.major_biz_segment not in ('Corporate')  
+                           then ee.sbu_region
+                             else aa.major_biz_segment end sbu_region,
+                         ee.bm_code,
+                         ee.branch_manager
+        from crm_clr_report_new      aa,
+             crm_prodsector_map      bb,
+             crm_insider_relations   dd,
+             crm_branch_region       ee,
+             rep_int_receivable_cust ff
+       where aa.product = bb.product(+)
+         and aa.cust_no = dd.cust_id(+)
+         and aa.branch_code = ee.branch_code(+)
+         and aa.account_number = ff.loan_accno(+)
+         and aa.reference_date =
+             (select prev_working_day
+                from sttm_dates@fcubs_dr
+               where branch_code = '000')
+         and upper(aa.major_biz_segment) in ('SME', 'RETAIL')
+         and aa.product <> 'MEM2';
+  
+  end prc_clr_ret_rpt;
+
+  procedure prc_deliquency_bukt(in_date in date, ret out sys_refcursor) is
+    v_date date;
+  begin
+    select prev_working_day
+      into v_date
+      from sttm_dates@fcubs_dr
+     where branch_code = '000';
+    if in_date >= v_date then
+      open ret for
+        select aa.reference_date,
+               aa.account_number,
+               aa.customer_name,
+               aa.limit_acy,
+               aa.limit_value_date,
+               aa.minor_biz_segment,
+               aa.major_biz_segment,
+               aa.product,
+               aa.product_name,
+               bb.retail_class retail_product_grop,
+               aa.total_balance,
+               aa.dpd total_days_past_due,
+               case
+                 when aa.dpd between 1 and 29 then
+                  aa.total_balance
+                 else
+                  null
+               end "1 - 29",
+               case
+                 when aa.dpd between 30 and 59 then
+                  aa.total_balance
+                 else
+                  null
+               end "30 - 59",
+               case
+                 when aa.dpd between 60 and 89 then
+                  aa.total_balance
+                 else
+                  null
+               end "60 - 89",
+               case
+                 when aa.dpd between 90 and 119 then
+                  aa.total_balance
+                 else
+                  null
+               end "90 - 119",
+               case
+                 when aa.dpd between 120 and 149 then
+                  aa.total_balance
+                 else
+                  null
+               end "120 - 149",
+               case
+                 when aa.dpd between 150 and 179 then
+                  aa.total_balance
+                 else
+                  null
+               end "150 - 179",
+               case
+                 when aa.dpd between 180 and 209 then
+                  aa.total_balance
+                 else
+                  null
+               end "180 - 209",
+               case
+                 when aa.dpd between 210 and 239 then
+                  aa.total_balance
+                 else
+                  null
+               end "210 - 239",
+               case
+                 when aa.dpd between 240 and 269 then
+                  aa.total_balance
+                 else
+                  null
+               end "240 - 269",
+               case
+                 when aa.dpd between 270 and 299 then
+                  aa.total_balance
+                 else
+                  null
+               end "270 - 299",
+               case
+                 when aa.dpd between 300 and 329 then
+                  aa.total_balance
+                 else
+                  null
+               end "300 - 329",
+               case
+                 when aa.dpd between 330 and 359 then
+                  aa.total_balance
+                 else
+                  null
+               end "330 - 359",
+               case
+                 when aa.dpd between 360 and 389 then
+                  aa.total_balance
+                 else
+                  null
+               end "360 - 389",
+               case
+                 when aa.dpd between 390 and 419 then
+                  aa.total_balance
+                 else
+                  null
+               end "390 - 419",
+               case
+                 when aa.dpd between 420 and 449 then
+                  aa.total_balance
+                 else
+                  null
+               end "420 - 449",
+               case
+                 when aa.dpd between 450 and 479 then
+                  aa.total_balance
+                 else
+                  null
+               end "450 - 479",
+               case
+                 when aa.dpd between 480 and 509 then
+                  aa.total_balance
+                 else
+                  null
+               end "480 - 509",
+               case
+                 when aa.dpd > 509 then
+                  aa.total_balance
+                 else
+                  null
+               end "510 ABOVE"
+          from crm_clr_report_new aa, retail_loan_class bb
+         where aa.product = bb.product_code(+);
+    else
+      open ret for
+        select aa.reference_date,
+               aa.account_number,
+               aa.customer_name,
+               aa.limit_acy,
+               aa.limit_value_date,
+               aa.minor_biz_segment,
+               aa.major_biz_segment,
+               aa.product,
+               aa.product_name,
+               bb.retail_class retail_product_grop,
+               aa.total_balance,
+               aa.dpd,
+               case
+                 when aa.dpd between 1 and 29 then
+                  aa.total_balance
+                 else
+                  null
+               end "1 - 29",
+               case
+                 when aa.dpd between 30 and 59 then
+                  aa.total_balance
+                 else
+                  null
+               end "30 - 59",
+               case
+                 when aa.dpd between 60 and 89 then
+                  aa.total_balance
+                 else
+                  null
+               end "60 - 89",
+               case
+                 when aa.dpd between 90 and 119 then
+                  aa.total_balance
+                 else
+                  null
+               end "90 - 119",
+               case
+                 when aa.dpd between 120 and 149 then
+                  aa.total_balance
+                 else
+                  null
+               end "120 - 149",
+               case
+                 when aa.dpd between 150 and 179 then
+                  aa.total_balance
+                 else
+                  null
+               end "150 - 179",
+               case
+                 when aa.dpd between 180 and 209 then
+                  aa.total_balance
+                 else
+                  null
+               end "180 - 209",
+               case
+                 when aa.dpd between 210 and 239 then
+                  aa.total_balance
+                 else
+                  null
+               end "210 - 239",
+               case
+                 when aa.dpd between 240 and 269 then
+                  aa.total_balance
+                 else
+                  null
+               end "240 - 269",
+               case
+                 when aa.dpd between 270 and 299 then
+                  aa.total_balance
+                 else
+                  null
+               end "270 - 299",
+               case
+                 when aa.dpd between 300 and 329 then
+                  aa.total_balance
+                 else
+                  null
+               end "300 - 329",
+               case
+                 when aa.dpd between 330 and 359 then
+                  aa.total_balance
+                 else
+                  null
+               end "330 - 359",
+               case
+                 when aa.dpd between 360 and 389 then
+                  aa.total_balance
+                 else
+                  null
+               end "360 - 389",
+               case
+                 when aa.dpd between 390 and 419 then
+                  aa.total_balance
+                 else
+                  null
+               end "390 - 419",
+               case
+                 when aa.dpd between 420 and 449 then
+                  aa.total_balance
+                 else
+                  null
+               end "420 - 449",
+               case
+                 when aa.dpd between 450 and 479 then
+                  aa.total_balance
+                 else
+                  null
+               end "450 - 479",
+               case
+                 when aa.dpd between 480 and 509 then
+                  aa.total_balance
+                 else
+                  null
+               end "480 - 509",
+               case
+                 when aa.dpd > 509 then
+                  aa.total_balance
+                 else
+                  null
+               end "510 ABOVE"
+          from crm_clr_report_hist aa, retail_loan_class bb
+         where aa.product = bb.product_code(+)
+           and aa.reference_date = in_date;
+    end if;
+  end prc_deliquency_bukt;
+
+  procedure prc_txn_summary(ret out sys_refcursor) is
+    v_m01 varchar2(10);
+    v_m02 varchar2(10);
+    v_m03 varchar2(10);
+  begin
+  
+    select to_char(add_months(sysdate, -1), 'rrrrmm') m01,
+           to_char(add_months(sysdate, -2), 'rrrrmm') m02,
+           to_char(add_months(sysdate, -3), 'rrrrmm') m03
+      into v_m01, v_m02, v_m03
+      from dual;
+  
+    open ret for
+      select decode(vv.category,
+                    'ATM',
+                    1,
+                    'POS',
+                    2,
+                    'WEB',
+                    3,
+                    'Internet Banking',
+                    4,
+                    'ETZ-UnionMobile',
+                    5,
+                    'Teller',
+                    6) sort_order,
+             vv.*
+        from (select case
+                       when aa.channel in ('ATM',
+                                           'POS',
+                                           'ETZ-UnionMobile',
+                                           'Internet Banking',
+                                           'WEB') then
+                        aa.channel
+                       else
+                        'Teller'
+                     end category,
+                     aa.*
+                from rep_transaction_summary aa
+               where aa.period in (v_m01, v_m02, v_m03)) vv
+       order by 1;
+  end prc_txn_summary;
+
+  procedure prc_od_renewal_cycle_ref(p_ref_date in date,
+                                     ret        out sys_refcursor) is
+  
+  begin
+    open ret for
+    
+      select a.branch_code brn,
+             upper(c.branch_name) brn_name,
+             to_char(a.cust_ac_no) new_ac_no,
+             to_char(a.alt_ac_no) old_ac_no,
+             a.cust_no cust_id,
+             a.ac_desc "CUSTOMER NAME",
+             to_char(a.account_class) product,
+             d.description "PRODUCT NAME",
+             a.ccy,
+             b.line "LIMIT ACY",
+             (case
+               when b.line_expiry_date > p_ref_date then
+                b.line
+               else
+                0
+             end) "OD AVAILABLE LIMIT ACY",
+             b.line_start_date "LIMIT VALUE DATE",
+             b.line_expiry_date "LIMIT EXPIRY DATE",
+             a.tod_limit,
+             tod_limit_start_date tod_start,
+             a.tod_limit_end_date tod_end,
+             (case
+               when a.tod_limit_end_date > p_ref_date and
+                    b.line_expiry_date > p_ref_date then
+                to_number(b.line) + to_number(a.tod_limit)
+               when (a.tod_limit_end_date < p_ref_date or
+                    a.tod_limit_end_date is null) and
+                    b.line_expiry_date > p_ref_date then
+                to_number(b.line)
+               when a.tod_limit_end_date > p_ref_date and
+                    (b.line_expiry_date < p_ref_date or
+                    b.line_expiry_date is null) then
+                to_number(a.tod_limit)
+               else
+                0
+             end) "TOTAL AVAILABLE LIMIT ACY",
+             a.acy_curr_balance "TOTAL BALANCE ACY",
+             a.lcy_curr_balance "TOTAL BALANCE LCY",
+             a.date_last_dr_activity date_last_dr,
+             a.date_last_cr_activity date_last_cr,
+             a.overdraft_since overdraft_since,
+             (case
+               when a.status_change_automatic in ('Y') then
+                'AUTO'
+               else
+                'MANUAL'
+             end) "CLASSIFICATION MODE",
+             decode(a.acc_status,
+                    'NORM',
+                    'PERFORMING',
+                    'WTL1',
+                    'WATCHLIST1',
+                    'WTL2',
+                    'WATCHLIST2',
+                    'WTL3',
+                    'WATCHLIST3',
+                    'SUBS',
+                    'SUBSTANDARD',
+                    'DOUB',
+                    'DOUBTFUL',
+                    'LOSS',
+                    'LOST',
+                    'WOFF',
+                    'WRITE-OFF',
+                    'NO RATING') "SYSTEM CLASS",
+             b.tranche_category booking_type,
+             b.tranche_description,
+             upper(mi.cbn) "CBN CLASSIFICATION",
+             upper(mi.rm) "RELATIONSHIP MANAGER",
+             upper(mi.minbiz) "MINOR BIZ SEGMENT",
+             upper(mi.majbiz) "MAJOR BIZ SEGMENT",
+             b.linecode,
+             b.line_serial,
+             b.clean_up_cycle,
+             b.monthly_turnover,
+             b.available_amount,
+             b.amount_utilised_today,
+             b.amount_reinstated_today,
+             b.crms_ref_number,
+             b.portfolio,
+             b.line_mat,
+             b.liab_br
+        from fcubslive.sttm_cust_account@fcubs_dr a
+        left join (select c.customer,
+                          nvl((select b.code_desc
+                                from fcubslive.gltm_mis_code@fcubs_dr b
+                               where b.mis_code = c.cust_mis_1
+                                 and b.mis_class = 'CBN'),
+                              'UNTAGGED') cbn,
+                          nvl((select b.code_desc
+                                from fcubslive.gltm_mis_code@fcubs_dr b
+                               where b.mis_code = c.cust_mis_4
+                                 and b.mis_class = 'RM_CODE'),
+                              'UNTAGGED') rm,
+                          nvl((select b.code_desc
+                                from fcubslive.gltm_mis_code@fcubs_dr b
+                               where b.mis_code = c.cust_mis_2
+                                 and b.mis_class = 'BIZ_SEG'),
+                              'UNTAGGED') minbiz,
+                          (case
+                            when c.cust_mis_2 in
+                                 ('REA_330', 'REM_310', 'RHN_340', 'RUM_320') then
+                             'RETAIL'
+                            when c.cust_mis_2 in ('SME_410', 'SME_420') then
+                             'SME'
+                            when c.cust_mis_2 in
+                                 ('COM_210', 'COM_220', 'COM_230') then
+                             'COMMERCIAL'
+                            when c.cust_mis_2 in ('TRE_510') then
+                             'TREASURY'
+                            when c.cust_mis_2 in ('COR_110',
+                                                  'COR_120',
+                                                  'COR_130',
+                                                  'COR_140',
+                                                  'COR_150') then
+                             'CORPORATE'
+                            else
+                             'UNTAGGED'
+                          end) majbiz
+                     from fcubslive.mitm_customer_default@fcubs_dr c) mi
+          on mi.customer = a.cust_no,
+       (select xx.cust_ac_no casa_no,
+                     xx.customer_no,
+                     aa.limit_amount line,
+                     aa.line_currency ccy,
+                     (aa.utilisation) od_utilized,
+                     aa.booking_date,
+                     aa.line_start_date,
+                     aa.line_expiry_date,
+                     xx.linked_ref_no,
+                     'FACLT' linksource,
+                     xx.effective_date,
+                     aa.udf_value_6 tranche_category,
+                     aa.description tranche_description,
+                     aa.udf_value_1 AS linecode,
+                     aa.line_serial,
+                     aa.udf_value_2 AS clean_up_cycle,
+                     aa.udf_value_3 AS monthly_turnover,
+                     aa.available_amount,
+                     aa.amount_utilised_today,
+                     aa.amount_reinstated_today,
+                     aa.udf_value_7 AS crms_ref_number,
+                     aa.udf_value_8 AS portfolio,
+                     aa.udf_value_9 AS line_mat,
+                     aa.liab_br
+                from fcubslive.getm_facility@fcubs_dr              aa,
+                     fcubslive.getm_liab@fcubs_dr                  bb,
+                     fcubslive.sttm_cust_account_linkages@fcubs_dr xx
+               where xx.customer_no = bb.liab_no
+                 and bb.id = aa.liab_id
+                 and xx.linked_ref_no = aa.line_code || aa.line_serial) b,
+       fcubslive.sttm_branch@fcubs_dr c,
+       fcubslive.sttm_account_class@fcubs_dr d
+       where a.branch_code = c.branch_code
+         and a.account_class != 'CT_001'
+         and a.cust_ac_no = b.casa_no
+         and a.branch_code = c.branch_code
+         and a.account_class = d.account_class;
+  end prc_od_renewal_cycle_ref;
+
+end pkg_ssrs_reports_1;
+
+11. OD RENEWAL CYCLE REPORT>>>>
+
+
+12.Past Due Obligations>>>
+ 
+ 
+
+
+

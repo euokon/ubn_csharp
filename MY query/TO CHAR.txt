@@ -1,0 +1,11 @@
+select a.*, to_char(to_date(a.txn_dttm, 'dd/mm/yyyy'), 'W') week_of_the_month,
+'Week'||' '|| to_char(to_date(a.txn_dttm, 'dd/mm/yyyy'), 'W') Weeks
+ from agn_txn_tbl a,
+ dw_agn_data_tbl b
+ where a.userid = b.agent_id(+)
+
+
+select b.region, a.cust_no, a.cust_ac_no, a.ac_desc, 
+a.dormancy_date, 'Q' || to_char(a.dormancy_date, 'Q') quarter from account_master a, new_branch_map b
+where a.branch_code = b.br_code(+)
+and dormancy_date in ('31dec2021', '31mar2022', '30jun2022', '30sep2022', '30nov2022')

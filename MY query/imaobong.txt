@@ -1,0 +1,14 @@
+SELECT a.cust_ac_no,
+       b.br_name,
+       b.bm_name,
+       b.bm_email,
+       b.region,
+       c.rm_name,
+       c.rm_email,
+       d.am_name,
+       d.am_email
+  FROM account_master a, new_branch_map b, rm_map c, new_area_map d /*temp_imaobong e*/
+ where a.branch_code = b.br_code(+)
+   AND a.rm_code = c.rm_code(+)
+   and b.area_id = d.area_id(+)
+   AND cust_ac_no = '0181548118'

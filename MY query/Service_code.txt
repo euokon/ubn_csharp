@@ -1,0 +1,61 @@
+create table agn_service_tbl as
+select distinct servicecode, 
+case when servicecode ='AGCASHDEP' then 'Cash Deposit'
+    when servicecode = 'AGCASHWTHD' then 'Cash withdrawal'
+    when servicecode = 'AGENTCASHDEP' then 'Agent cash deposit'
+    when servicecode ='AGENTFUND' then 'Agent Fund'
+    when servicecode = 'AGENTFUNDREV' then 'Agent fund reversal'
+    when servicecode = 'AGN2OWNAC' then 'Core Account Funding'
+    when servicecode = 'AGNCRDCSHWTDOTH' then 'Cash withdrawal card other bank'
+    when servicecode ='AGNCRDCSHWTDOWN' then  'Cashwithdrawal Card Union bank'
+    when servicecode ='AGNCRDFTXNOTH' then 'Fundtransfer Card Otherbank'
+    when servicecode ='AGNCRDFTXNOWN' then 'Fundtransfer Card Union bank'
+    when servicecode ='AGNPAYBILLAIRTIME'then 'Paybill Airtime Recharge'
+    when servicecode ='AGNPOSINS' then 'Unclear'
+    when servicecode ='AGNSWEEPCOM' then 'Agent commission'
+    when servicecode ='AGNWAL2WAL'   then 'Agent wallet to wallet'
+    when servicecode ='AGNWALCLSR'  then  'Unclear'
+    when servicecode ='CUSAC2WAL' then 'Customer account to wallet'
+    when servicecode ='CUSWAL2OWNAC' then 'Customer wallet to union bank account'
+    when servicecode ='CUSWAL2WAL' then 'Customer wallet to wallet'
+    when servicecode ='EXTFUNDWAL' then 'External fund wallet'
+    when servicecode ='WALAGNOTBANK' then 'Fund transfer other bank'
+    when servicecode ='WALAGNOWNBANK' then 'Fund Transfer Own Bank'
+    when servicecode ='WALAGNTOOWNBANK'  then 'Unclear'
+    when servicecode ='WALPAYBILLAGN' then 'Paybill'
+    else 'Unmapped code'
+end AS Description 
+FROM unionceva.Wallet_fin_txn@cevadb 
+where  reversal_flag = 'N'
+and substr(txn_ref_no, 1, 1) <> 'R'
+
+union 
+select distinct trans_type,
+case when trans_type ='AGCASHDEP' then 'Cash Deposit'
+    when trans_type = 'AGCASHWTHD' then 'Cash withdrawal'
+    when trans_type = 'AGENTCASHDEP' then 'Agent cash deposit'
+    when trans_type ='AGENTFUND' then 'Agent Fund'
+    when trans_type = 'AGENTFUNDREV' then 'Agent fund reversal'
+    when trans_type = 'AGN2OWNAC' then 'Core Account Funding'
+    when trans_type = 'AGNCRDCSHWTDOTH' then 'Cash withdrawal card other bank'
+    when trans_type ='AGNCRDCSHWTDOWN' then  'Cashwithdrawal Card Union bank'
+    when trans_type ='AGNCRDFTXNOTH' then 'Fundtransfer Card Otherbank'
+    when trans_type ='AGNCRDFTXNOWN' then 'Fundtransfer Card Union bank'
+    when trans_type ='AGNPAYBILLAIRTIME'then 'Paybill Airtime Recharge'
+    when trans_type ='AGNPOSINS' then 'Unclear'
+    when trans_type ='AGNSWEEPCOM' then 'Agent commission'
+    when trans_type ='AGNWAL2WAL'   then 'Agent wallet to wallet'
+    when trans_type ='AGNWALCLSR'  then  'Unclear'
+    when trans_type ='CUSAC2WAL' then 'Customer account to wallet'
+    when trans_type ='CUSWAL2OWNAC' then 'Customer wallet to union bank account'
+    when trans_type ='CUSWAL2WAL' then 'Customer wallet to wallet'
+    when trans_type ='EXTFUNDWAL' then 'External fund wallet'
+    when trans_type ='WALAGNOTBANK' then 'Fund transfer other bank'
+    when trans_type ='WALAGNOWNBANK'then 'Fund Transfer Own Bank'
+    when trans_type ='WALAGNTOOWNBANK'  then 'Unclear'
+    when trans_type ='WALPAYBILLAGN' then 'Paybill'
+    else 'Unmapped code'
+end AS Description
+from  unionceva.WALLET_AGNCORE_TXNTBL@cevadb
+where resp_code <> '00';
+commit;

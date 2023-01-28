@@ -1,0 +1,78 @@
+PROCEDURE
+
+create or replace procedure balablu is
+
+begin
+
+  insert into brian_count
+    select ac_open_date, count(cust_ac_no)
+      from account_master
+     where ac_open_date >= '01jan2023'
+     group by ac_open_date;
+  commit;
+end;
+-----------------------------------------------------------------------
+create or replace procedure balablu_blu(p_start_date in varchar2,
+                                        p_end_date   in varchar2) is
+
+begin
+
+  insert into brian_count
+    select ac_open_date, count(cust_ac_no)
+      from account_master
+     where ac_open_date between p_start_date and p_end_date
+     group by ac_open_date;
+  commit;
+end;
+----------------------------------------------------------------------------
+create or replace procedure balablu_blu2 is
+
+  v_ac_open_date date;
+
+begin
+
+  insert into tmp_brian_count
+    select ac_open_date, count(cust_ac_no)
+      from account_master
+     where ac_open_date = v_ac_open_date
+     group by ac_open_date;
+  commit;
+  delete from brian_count where ac_open_date = v_ac_open_date;
+  commit;
+  insert into brian_count
+  select * from tmp_brian_count;
+  commit;
+  execute immediate 'trunc(tmp_brian_count)';
+  --- when truncating in a prc you use an immediate execute cmd
+end;
+--------------------------------------------------------------------------
+create or replace procedure balablu_blu4(p_cust_ac_no out sys_refcursor) is
+
+begin
+  open p_cust_ac_no for
+    select * from brian_count;
+end;
+-----------------------------------------------------------------------
+create or replace procedure balablu_blu5(p_start_date in varchar2,
+                                         p_end_date   in varchar2, p_cust_ac_no out sys_refcursor) is
+
+begin
+
+  open p_cust_ac_no for
+    select *
+      from brian_count
+     where ac_open_date between p_start_date and p_end_date;
+end;
+-----------------------------------------------------------------------
+create or replace procedure balablu_blu6(p_account_count in number,
+                                          resty out sys_refcursor) is
+
+begin
+
+  open resty for
+    select *
+      from brian_count
+     where ac_open_date >= p_account_count;
+end;
+---- where the count column is > than
+---------------------------------------------------------------------------

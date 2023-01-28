@@ -1,0 +1,44 @@
+select xx.*, nvl(zz.channel, 'OTHERS') channel
+  from (select account_no,
+               account_name,
+               branch_code,
+               branch_name,
+               pan,              
+               decode(UPPER(card_status),
+                       '1',
+                       'INACTIVE',
+                       '0',
+                       'ACTIVE') card_status,
+             /*  1075 amt_to_be_debited,*/
+               card_type,  
+               ab.status hotlisted,
+               activation_date,
+               issue_date,
+               expiry_date
+          from all_account_cards aa, hotlisted_card_rpt ab
+         where aa.account_no = ab.accountnumber(+)
+           and trunc(issue_date) between '01sep2021' and '01sep2022'
+           and account_no not in
+           (select distinct account_no 
+           from card_charge
+           where issue_date between '01sep2021' and '01sep2022' )) xx,    
+    (select accountnumber account_id,
+               trunc(dateissued) issue_date,
+               'INSTANT CARD' channel
+          from V_CARDACCOUNT_REQ
+         where upper(status) = 'LINKED'
+           and trunc(dateissued)  between '01sep2021' and '01sep2022'
+        union
+        select account_id,
+               trunc(submitted_date) issue_date,
+               'E-REQUEST' channel
+          from atm_request
+         where trunc(submitted_date)  between '01sep2021' and '01sep2022'
+        union
+        select account_id,
+               trunc(submitted_date) issue_date,
+               'E-REQUEST' channel
+          from mcd_request
+         where trunc(submitted_date) between '01sep2021' and '30sep2022') zz
+         where xx.account_no = zz.account_id(+)
+AND TRUNC(xx.issue_date) = zz.issue_date

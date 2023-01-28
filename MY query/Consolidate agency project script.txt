@@ -1,0 +1,447 @@
+procedure agency_prc (v_run_date date) as
+  run_date date := v_run_date;
+begin
+
+ ----pos table
+ execute immediate 'truncate table agn_pos_tbl';   
+insert into agn_pos_tbl 
+select b.serial pos_serial_no,terminal_id,location,
+b.yrpurchased year_purchased,
+b.status pos_status,
+h.user_id agent_id,
+maker_dttm date_mapped,
+v_run_date business_date
+  from 
+   stg_pos_serial_status b
+  left outer join 
+ (select * from  unionceva.terminal_master@cevadb
+ where status = 'A')h
+     
+ on(b.serial= h.serial_no);
+ commit;
+
+
+-----service table
+
+ execute immediate 'truncate table agn_service_tbl';   
+insert into agn_service_tbl
+insert into agn_service_tbl
+select distinct servicecode, 
+case when servicecode ='AGCASHDEP' then 'Cash Deposit'
+    when servicecode = 'AGCASHWTHD' then 'Cash withdrawal'
+    when servicecode = 'AGENTCASHDEP' then 'Agent cash deposit'
+    when servicecode ='AGENTFUND' then 'Agent Fund'
+    when servicecode = 'AGENTFUNDREV' then 'Agent fund reversal'
+    when servicecode = 'AGN2OWNAC' then 'Core Account Funding'
+    when servicecode = 'AGNCRDCSHWTDOTH' then 'Cash withdrawal card other bank'
+    when servicecode ='AGNCRDCSHWTDOWN' then  'Cashwithdrawal Card Union bank'
+    when servicecode ='AGNCRDFTXNOTH' then 'Fundtransfer Card Otherbank'
+    when servicecode ='AGNCRDFTXNOWN' then 'Fundtransfer Card Union bank'
+    when servicecode ='AGNPAYBILLAIRTIME'then 'Paybill Airtime Recharge'
+    when servicecode ='AGNPOSINS' then 'Unclear'
+    when servicecode ='AGNSWEEPCOM' then 'Agent commission'
+    when servicecode ='AGNWAL2WAL'   then 'Agent wallet to wallet'
+    when servicecode ='AGNWALCLSR'  then  'Unclear'
+    when servicecode ='CUSAC2WAL' then 'Customer account to wallet'
+    when servicecode ='CUSWAL2OWNAC' then 'Customer wallet to union bank account'
+    when servicecode ='CUSWAL2WAL' then 'Customer wallet to wallet'
+    when servicecode ='EXTFUNDWAL' then 'External fund wallet'
+    when servicecode ='WALAGNOTBANK'then 'Fund transfer other bank'
+    when servicecode ='WALAGNOWNBANK'then 'Fund Transfer Own Bank'
+    when servicecode ='WALAGNTOOWNBANK'  then 'Unclear'
+    when servicecode ='WALPAYBILLAGN' then 'Paybill'
+    else 'Unmapped code'
+end AS Description,
+v_run_date business_date 
+FROM unionceva.Wallet_fin_txn@cevadb 
+where  reversal_flag = 'N'
+and substr(txn_ref_no, 1, 1) <> 'R'
+
+union 
+select distinct trans_type,
+case when trans_type ='AGCASHDEP' then 'Cash Deposit'
+    when trans_type = 'AGCASHWTHD' then 'Cash withdrawal'
+    when trans_type = 'AGENTCASHDEP' then 'Agent cash deposit'
+    when trans_type ='AGENTFUND' then 'Agent Fund'
+    when trans_type = 'AGENTFUNDREV' then 'Agent fund reversal'
+    when trans_type = 'AGN2OWNAC' then 'Core Account Funding'
+    when trans_type = 'AGNCRDCSHWTDOTH' then 'Cash withdrawal card other bank'
+    when trans_type ='AGNCRDCSHWTDOWN' then  'Cashwithdrawal Card Union bank'
+    when trans_type ='AGNCRDFTXNOTH' then 'Fundtransfer Card Otherbank'
+    when trans_type ='AGNCRDFTXNOWN' then 'Fundtransfer Card Union bank'
+    when trans_type ='AGNPAYBILLAIRTIME'then 'Paybill Airtime Recharge'
+    when trans_type ='AGNPOSINS' then 'Unclear'
+    when trans_type ='AGNSWEEPCOM' then 'Agent commission'
+    when trans_type ='AGNWAL2WAL'   then 'Agent wallet to wallet'
+    when trans_type ='AGNWALCLSR'  then  'Unclear'
+    when trans_type ='CUSAC2WAL' then 'Customer account to wallet'
+    when trans_type ='CUSWAL2OWNAC' then 'Customer wallet to union bank account'
+    when trans_type ='CUSWAL2WAL' then 'Customer wallet to wallet'
+    when trans_type ='EXTFUNDWAL' then 'External fund wallet'
+    when trans_type ='WALAGNOTBANK' then 'Fund transfer other bank'
+    when trans_type ='WALAGNOWNBANK'then 'Fund Transfer Own Bank'
+    when trans_type ='WALAGNTOOWNBANK'  then 'Unclear'
+    when trans_type ='WALPAYBILLAGN' then 'Paybill'
+    else 'Unmapped code'
+end AS Description,
+v_run_date business_date
+from  unionceva.WALLET_AGNCORE_TXNTBL@cevadb
+where resp_code <> '00';
+commit;
+
+execute immediate 'truncate table agn_data_tbl';
+
+insert into  agn_data_tbl ---as
+select a.user_id agent_id,
+       a.first_name agent_name,
+       a.customer_code, 
+       a.date_created creation_date,
+       a.w_prd_code product_code,
+       a.w_prd_desc product_desc,
+       a.account_no,
+       a.acc_branch, 
+       a.status,
+       a.ref_num,
+       a.rm_code,
+       c.branch_code,
+       c.address,
+       c.rl_lga LGA,
+       c.r_state state
+       v_run_date business_date
+from dw_agent_customer_master a,
+     dw_agent_contact_info c
+ where a.user_id = c.mobile_number(+);
+ commit;
+
+
+ 
+ delete from agn_data_tbl where trunc(trans_date) = v_run_date;
+ 
+insert into  agn_txn_tbl 
+select * from
+(SELECT dr_acct_no,
+trans_date,
+resp_code,
+'FAILED' resp_mesg,
+userid,
+channel,
+cast(trns_amt as VARCHAR2(2000 CHAR)) trans_amt,
+fee,
+ben_paybill_actno,
+ben_cust_name,
+trans_type,
+dr_narration,
+'' reversal_flag,
+ ''status,
+ ''txn_ref_no
+from  dw_wallet_agncore_txntbl 
+where resp_code <> '00'
+
+UNION ALL
+
+select 
+
+dr_account,
+TXN_DTTM,
+'00'resp_code,
+'SUCCESSFUL'resp_mesg,
+user_id,
+channel,
+txn_amt,
+fee_amt,
+cr_account,
+ 'NULL' ben_cust_name,
+SERVICECODE trans_type,
+dr_narration,
+reversal_flag,
+status,
+txn_ref_no
+from dw_wallet_fin_txn
+where reversal_flag = 'N'
+and substr(txn_ref_no, 1, 1) <> 'R')
+where trunc(trans_date)>= v_run_date;
+ commit;
+
+
+ execute immediate 'truncate table agn_prod_tbl';
+ insert into agn_prod_tbl
+select prd_code, prd_name, application,status from unionceva.product@cevadb;
+commit;
+
+
+ delete from failure_analysis where trunc(trans_date) = v_run_date;
+
+-- execute immediate 'truncate table failure_analysis';
+insert into failure_analysis
+
+SELECT trans_date,
+           br_code,
+           area,
+           region,
+           fail,
+           success,
+           induced,
+           response,
+           v_run_date business_date
+      FROM (SELECT resp_mesg,
+                   a.userid,
+                   to_date(trunc(trans_date), 'dd-mm-yy') trans_date,
+                   b.branch_code br_code,
+                   area,
+                   region,
+                   c.resp_code,
+                   c.induced,
+                   c.response
+              from agn_txn_tbl    a,
+                   agn_data_tbl   b,
+                   agn_resp_tbl   c,
+                   new_branch_map d
+             where a.userid = b.agent_id(+)
+               and c.resp_code = a.resp_code
+               and b.branch_code = d.br_code
+               and trans_date = trunc(v_run_date))-- trunc(v_run_date)
+    PIVOT(COUNT(userid)
+       FOR resp_mesg IN('FAILED' as Fail, 'SUCCESSFUL' as Success))
+     order by trans_date;
+     commit;
+     
+  execute immediate 'truncate table pos_inventory';
+
+   insert into pos_inventory
+    select total_pos, year_purchased, pos_cat,v_run_date business_date
+      from (select count(*) total_pos,
+                   year_purchased,
+                   case
+                     when (agent_id is not null and pos_status = 'GOOD') then
+                      'with_agent'
+                     when pos_status = 'UNDER REPAIRS' then
+                      'Under_Repairs'
+                     when pos_status in ('MISSING', 'STOLEN') then
+                      'Lost_Missing'
+                     when pos_status = 'FAULTY' then
+                      'faulty'
+                     when (agent_id is null and pos_status = 'GOOD') then
+                      'Vault'
+                     else
+                      pos_status
+                   end pos_cat
+              from agn_pos_tbl
+             group by year_purchased,
+                      case
+                        when (agent_id is not null and pos_status = 'GOOD') then
+                         'with_agent'
+                        when pos_status = 'UNDER REPAIRS' then
+                         'Under_Repairs'
+                        when pos_status in ('MISSING', 'STOLEN') then
+                         'Lost_Missing'
+                        when pos_status = 'FAULTY' then
+                         'faulty'
+                        when (agent_id is null and pos_status = 'GOOD') then
+                         'Vault'
+                        else
+                         pos_status
+                      end)
+    union
+    
+    ----inactive
+    
+    select count(pos_serial_no) pos_inactive,
+           year_purchased,
+           'Inactive' pos_cat, v_run_date business_date
+      from (select distinct pos_serial_no,
+                            agent_id,
+                            date_mapped,
+                            year_purchased
+              from agn_pos_tbl
+             where pos_status = 'GOOD'
+               and agent_id is not null) a
+     where a.agent_id not in
+           (select distinct userid
+              from agn_txn_tbl
+             where channel = 'POS'
+               and resp_code = '00'
+               and trunc(trans_date) in
+                   (select distinct day_date
+                      from date_dimension
+                     where trunc(day_date) >= trunc(v_run_date) - 30
+                    --where month_key = to_char(trunc(sysdate),'rrrrmm')-1
+                    ))
+     group by year_purchased
+    
+    ---active
+    union
+    
+    select count(pos_serial_no) pos_inactive,
+           year_purchased,
+           'Active' pos_cat,
+           v_run_date business_date
+      from (select distinct pos_serial_no,
+                            agent_id,
+                            date_mapped,
+                            year_purchased
+              from agn_pos_tbl
+             where pos_status = 'GOOD'
+               and agent_id is not null) a
+     where a.agent_id in
+           (select distinct userid
+              from agn_txn_tbl
+             where channel = 'POS'
+               and resp_code = '00'
+               and trunc(trans_date) in
+                   (select distinct day_date
+                      from date_dimension
+                     where trunc(day_date) >= trunc(v_run_date) - 30
+                    --where month_key = to_char(trunc(sysdate),'rrrrmm')-1
+                    ))
+     group by year_purchased;
+ commit;
+
+
+
+execute immediate 'truncate table daily_pos_data';
+
+  insert into daily_pos_data
+  
+   
+----daily pos data
+
+select current_year,month_name,month_key,metrics,
+case when day_date > trunc(sysdate) then 0 else  cnt end ctn,day_date --business_date
+from
+
+(select current_year,month_name,month_key,'No of Agent with POS' metrics,count(distinct agent_id) cnt,day_date
+from agn_pos_tbl a,
+(select month_key,month_name,current_year,day_date
+from date_dimension
+where trunc(day_date)  >=TRUNC(v_run_date, 'MM')
+and trunc(day_date)<=TRUNC(LAST_DAY(v_run_date))) b
+where pos_status = 'GOOD'
+and agent_id is not null
+--and week_of_month = 1
+and  trunc(date_mapped) <= day_date
+group by month_key,month_name,current_year,day_date)
+union
+
+select current_year,month_name,month_key,metrics,
+case when day_date > trunc(sysdate) then 0 else  agnt_POS_wk1 end agnt_POS_wk1,day_date
+from
+(select distinct  current_year,month_name,month_key,'Total POS Count' metrics,count(*) agnt_POS_wk1,day_date
+from agn_pos_tbl a,
+(select month_key,month_name,current_year, day_date
+from date_dimension
+where trunc(day_date)  >=TRUNC(v_run_date, 'MM')
+and trunc(day_date) <=TRUNC(LAST_DAY(v_run_date))
+) b
+where pos_status = 'GOOD'
+and agent_id is not null
+and  trunc(date_mapped) <= day_date
+group by month_key,month_name,current_year,day_date)
+
+
+union
+
+select current_year,month_name,month_key,week_dim,
+case when day_date > trunc(sysdate) then 0 else  agnt_POS_wk1 end agnt_POS_wk1,day_date from(
+select distinct current_year,month_name,month_key, 'Active POS Count' week_dim,
+count(*) agnt_POS_wk1,day_date--count(distinct  pos_serial_no)  cnt
+
+from(select distinct pos_serial_no,agent_id,date_mapped from agn_pos_tbl
+where pos_status = 'GOOD'
+and agent_id is not null)a,
+(select month_key,month_name,current_year, day_date
+from date_dimension
+where trunc(day_date)>=TRUNC(rundate, 'MM')
+and trunc(day_date)<= TRUNC(LAST_DAY(v_run_date)))b
+where trunc(date_mapped) <=day_date
+and a.agent_id  in
+(select distinct userid from agn_txn_tbl
+where channel = 'POS'
+and resp_code = '00'
+and trunc(trans_date)  in
+(select distinct day_date from date_dimension
+where trunc(day_date) >=TRUNC(v_run_date, 'MM')
+and trunc(day_date)<= TRUNC(LAST_DAY(v_run_date))))
+group by month_key,month_name,current_year,day_date)
+
+union
+
+
+select current_year,month_name,month_key,week_dim,
+case when day_date > trunc(sysdate) then 0 else  agnt_POS_wk1 end agnt_POS_wk1,day_date from(
+select distinct current_year,month_name,month_key, 'Inactive POS Count' week_dim,
+count(*) agnt_POS_wk1,day_date--count(distinct  pos_serial_no)  cnt
+
+from(select distinct pos_serial_no,agent_id,date_mapped from agn_pos_tbl
+where pos_status = 'GOOD'
+and agent_id is not null)a,
+(select month_key,month_name,current_year,day_date
+from date_dimension
+where trunc(day_date) >=TRUNC(v_run_date, 'MM')
+and trunc(day_date)<= TRUNC(LAST_DAY(v_run_date)))b
+where trunc(date_mapped) <=day_date
+and a.agent_id not in
+(select distinct userid from agn_txn_tbl
+where channel = 'POS'
+and resp_code = '00'
+and trunc(trans_date)  in
+(select distinct day_date from date_dimension
+where trunc(day_date) >=TRUNC(v_run_date, 'MM')
+and trunc(day_date) <= TRUNC(LAST_DAY(v_run_date))))
+group by month_key,month_name,current_year,day_date)
+
+union
+
+select current_year,month_name,month_key,week_dim,
+case when day_date > trunc(sysdate) then 0 else  agnt_POS_wk1 end agnt_POS_wk1,day_date from(
+select distinct current_year,month_name,month_key, 'In Branch POS Count' week_dim,
+count(*) agnt_POS_wk1,day_date--count(distinct  pos_serial_no)  cnt
+from(select distinct pos_serial_no,agent_id,date_mapped from agn_pos_tbl
+where pos_status = 'GOOD'
+and agent_id is not null)a,
+(select month_key,month_name,current_year, day_date
+from date_dimension
+where  trunc(day_date)  >=TRUNC(v_run_date, 'MM')
+and trunc(day_date)<= TRUNC(LAST_DAY(v_run_date))
+)b
+where trunc(date_mapped) >= trunc(day_date) -12
+and trunc(date_mapped) <=day_date
+and a.agent_id not in
+(select distinct userid from agn_txn_tbl
+where channel = 'POS'
+and resp_code = '00'
+and trunc(trans_date)  in
+(select distinct day_date from date_dimension
+where  trunc(day_date) >=TRUNC(v_run_date, 'MM')
+and trunc(day_date) <= TRUNC(LAST_DAY(v_run_date))))
+group by month_key,month_name,current_year,day_date)
+
+union
+select current_year,month_name,month_key,week_dim,
+case when day_date > trunc(sysdate) then 0 else  agnt_POS_wk1 end agnt_POS_wk1,day_date from(
+select distinct current_year,month_name,month_key, 'In Transit POS Count' week_dim,
+count(*) agnt_POS_wk1,day_date--count(distinct  pos_serial_no)  cnt
+from(select distinct pos_serial_no,agent_id,date_mapped from agn_pos_tbl
+where pos_status = 'GOOD'
+and agent_id is not null)a,
+(select month_key,month_name,current_year, day_date
+from date_dimension
+where trunc(day_date) >=TRUNC(v_run_date, 'MM')
+and trunc(day_date) <= TRUNC(LAST_DAY(v_run_date)))b
+where trunc(date_mapped) >= trunc(day_date) -7
+and trunc(date_mapped) <=day_date
+and a.agent_id not in
+(select distinct userid from agn_txn_tbl
+where channel = 'POS'
+and resp_code = '00'
+and trunc(trans_date)  in
+(select distinct day_date from date_dimension
+where trunc(day_date) >=TRUNC(v_run_date, 'MM')
+and trunc(day_date) <= TRUNC(LAST_DAY(v_run_date))))
+group by month_key,month_name,current_year,day_date);
+
+commit;
+
+commit;
+
+           
+end

@@ -1,0 +1,6 @@
+select a.cust_no acct_no, b.br_code, b.br_name, sum(c.lcy_amount) balance, c.narration
+  from gift a, new_branch_map b, actb_history c
+  where a.cust_no = c.ac_no(+)
+  and b.br_code = c.ac_branch(+)
+  and c.narration like '%Remittance%'
+  group by a.cust_no, b.br_code, b.br_name, c.narration

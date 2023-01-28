@@ -1,0 +1,13 @@
+select prd_code, prd_name, application,status from unionceva.product@cevadb
+
+create table agn_prod_tbl(
+prod_id varchar2(10),
+prod_code varchar2(50),
+prod_name varchar(50),
+application varchar(50),
+status varchar2(5));
+commit;
+
+
+select * from agn_prod_tbl
+for update;

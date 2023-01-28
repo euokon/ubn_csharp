@@ -1,0 +1,23 @@
+SELECT a.customer_no,
+       b.cust_ac_no,
+       a.corporate_name,
+       a.rm_code,
+       c.br_name,
+       --c.bm_name,
+       c.bm_email,
+       c.region,
+       d.minbiz cbg_segment
+       --d.am_name,
+       --d.am_email
+  FROM customer_master a, new_branch_map c, account_master b, customer_dashboard d
+ WHERE a.local_branch = c.br_code(+)
+   and a.customer_no = b.cust_no(+)
+   and b.cust_no = d.customer(+)
+   and bus_sgt = 'CORPORATE'
+   AND customer_no NOT IN
+       (SELECT customer_id FROM cibank.CORPORATE_PROFILE@fcubs_dr)
+       and d.minbiz in ('Specialized Market',
+                            'General Market',
+                            'Foods & Beverages',
+                            'Energy - Downstream',
+                            'Energy - Upstream')

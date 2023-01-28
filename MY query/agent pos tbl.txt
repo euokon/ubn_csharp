@@ -1,0 +1,30 @@
+create table agn_pos_tbl as
+select b.serial pos_serial_no,terminal_id,location,---valid_thru,ref_num
+b.yrpurchased year_purchased,
+b.status pos_status,
+h.user_id agent_id
+  from 
+   stg_pos_serial_status b
+  left outer join 
+  (select *
+          from unionceva.terminal_master@cevadb
+         where length(serial_no) = 11
+           and (substr(serial_no, 0, 6) = 'G200WT' or
+                substr(serial_no, 0, 7) in ('G20047F', 'G20047G', 'G2004RA'))
+           and regexp_like(substr(serial_no, -2, 2), '^[^a-zA-Z]*$') -- New G2
+           and status = 'A'
+        union
+        select *
+          from unionceva.terminal_master@cevadb
+         where length(serial_no) = 14
+           and substr(serial_no, 0, 5) in ('10210', '10201')
+           and regexp_like(substr(serial_no, -2, 2), '^[^a-zA-Z]*$') -- Android
+           and status = 'A'
+        union
+        select *
+          from unionceva.terminal_master@cevadb
+         where serial_no = 'K3702Q86646')h  
+          -- Old G2)
+     
+ on(b.serial= h.serial_no);
+ commit;
