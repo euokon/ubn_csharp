@@ -1,5 +1,11 @@
-    {
+    [{
         "name": "Emmanuel",
         "department": "Solution Delivery",
         "designation": "Software Developer"
+    },
+    {
+        "name": "Samson",
+        "department": "Data Analytics Office",
+        "designation": "Data Analyst"
     }
+]
