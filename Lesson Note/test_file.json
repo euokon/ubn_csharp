@@ -29,9 +29,14 @@
     "department": "Data and Analytics",
     "designation": "Business Analyst"
   },
-    {
+  {
         "name": "Nathan",
         "department": "DAO",
         "designation": "Data Scientist"
-    }
+  },
+  {
+      "name": "Samson",
+      "department": "Data Analytics Office",
+      "designation": "Data Analyst"
+  }
 ]
