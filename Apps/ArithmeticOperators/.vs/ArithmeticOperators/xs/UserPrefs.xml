@@ -1,0 +1,23 @@
+﻿<Properties StartupConfiguration="{791A16F7-87A5-4E7E-B69B-FAFDCDA564A6}|Default">
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.Workbench ActiveDocument="ArithmeticOperators/Program.cs">
+    <Files>
+      <File FileName="ArithmeticOperators/Program.cs" Line="45" Column="23" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="ArithmeticOperators" expanded="True">
+            <Node name="ArithmeticOperators" expanded="True" />
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.ArithmeticOperators PreferredExecutionTarget="MonoDevelop.Default" />
+</Properties>
