@@ -3,7 +3,7 @@
         "name": "Emmanuel",
         "department": "Solution Delivery",
         "designation": "Software Developer"
-    },
+    } ,
     {
         "name": "Nathan",
         "department": "DAO",
@@ -22,4 +22,14 @@
     "department": "DAO",
     "designation": "Data Scientist"
 }
+        "name": "Mofi",
+        "department": "Data and Analytics",
+        "designation": "Business Analyst"
+    } ,
+    {"name": "Bisola",
+    "department": "Data & Analytics",
+    "designation": "Report Analyst"
+  }
+      
+    
 ]
