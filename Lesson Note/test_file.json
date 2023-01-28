@@ -1,20 +1,10 @@
-    [
-      {
-        "name": "Emmanuel",
-        "department": "Solution Delivery",
-        "designation": "Software Developer"
-    } ,
-    {
-        "name": "Nathan",
-        "department": "DAO",
-        "designation": "Data Scientist"
-    }
-      "name": "",
-      "department": "",
-      "designation": ""
-
 [
-  
+  {
+    "name": "Emmanuel",
+    "department": "Solution Delivery",
+    "designation": "Software Developer"
+  },
+  {
     "name": "Brian",
     "department": "Solution Delivery",
     "designation": "Software Developer"
@@ -25,18 +15,34 @@
       "designation": "Report Analyst"
   },
   {
-    "name": "Steve",
+    "name": "Tashy",
     "department": "Data & Analytics",
-    "designation": "Report Analyst"
-  }
+    "designation": "Data solution developer"
+  },
   {
-    "name": "Farida",
-    "department": "DAO",
-    "designation": "Data Scientist"
-}
-        "name": "Mofi",
-        "department": "Data and Analytics",
-        "designation": "Business Analyst"
-    } ,
-    
+    "name": "",
+    "department": "",
+    "designation": ""
+  },
+  {
+    "name": "Mofi",
+    "department": "Data and Analytics",
+    "designation": "Business Analyst"
+  },
+  {
+        "name": "Nathan",
+        "department": "DAO",
+        "designation": "Data Scientist"
+  },
+  {
+      "name": "Samson",
+      "department": "Data Analytics Office",
+      "designation": "Data Analyst"
+  },
+  {
+    "name": "Victor",
+    "department": "Data & Analytics Office",
+    "designation": "Data Analyst"
+
+  }
 ]
