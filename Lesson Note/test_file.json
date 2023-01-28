@@ -2,4 +2,9 @@
         "name": "Emmanuel",
         "department": "Solution Delivery",
         "designation": "Software Developer"
+    },
+    {
+        "name": "Nathan",
+        "department": "DAO",
+        "designation": "Data Scientist"
     }
