@@ -1,22 +1,21 @@
-[
-  {
-    "name": "Emmanuel",
-    "department": "Solution Delivery",
-    "designation": "Software Developer"
-  },
-  {
-    "name": "Brian",
-    "department": "Solution Delivery",
-    "designation": "Software Developer"
-  },
-  {
+    [{
+        "name": "Emmanuel",
+        "department": "Solution Delivery",
+        "designation": "Software Developer"
+    },
+    {
+        "name": "Samson",
+        "department": "Data Analytics Office",
+        "designation": "Data Analyst"
+    },
+    {
       "name": "Bisola",
       "department": "Data & Analytics",
       "designation": "Report Analyst"
   },
   {
-    "name": "Steve",
-    "department": "Data & Analytics",
-    "designation": "Report Analyst"
-  }
+    "name": "Victor",
+    "department": "Artificial Intelligence and Insights",
+    "designation": "Data Scientist"
+}
 ]
