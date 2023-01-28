@@ -9,8 +9,10 @@
         "department": "Data and Analytics",
         "designation": "Business Analyst"
     } ,
-      "name": "Bisola",
-      "department": "Data & Analytics",
-      "designation": "Report Analyst"
+    {"name": "Bisola",
+    "department": "Data & Analytics",
+    "designation": "Report Analyst"
   }
+      
+    
 ]
