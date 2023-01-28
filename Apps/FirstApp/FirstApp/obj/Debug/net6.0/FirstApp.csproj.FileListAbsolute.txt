@@ -1,0 +1,15 @@
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/bin/Debug/net6.0/FirstApp
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/bin/Debug/net6.0/FirstApp.deps.json
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/bin/Debug/net6.0/FirstApp.runtimeconfig.json
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/bin/Debug/net6.0/FirstApp.dll
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/bin/Debug/net6.0/FirstApp.pdb
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/obj/Debug/net6.0/FirstApp.csproj.AssemblyReference.cache
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/obj/Debug/net6.0/FirstApp.GeneratedMSBuildEditorConfig.editorconfig
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/obj/Debug/net6.0/FirstApp.AssemblyInfoInputs.cache
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/obj/Debug/net6.0/FirstApp.AssemblyInfo.cs
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/obj/Debug/net6.0/FirstApp.csproj.CoreCompileInputs.cache
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/obj/Debug/net6.0/FirstApp.dll
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/obj/Debug/net6.0/refint/FirstApp.dll
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/obj/Debug/net6.0/FirstApp.pdb
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/obj/Debug/net6.0/FirstApp.genruntimeconfig.cache
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/obj/Debug/net6.0/ref/FirstApp.dll
