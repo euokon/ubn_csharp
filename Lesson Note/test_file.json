@@ -9,7 +9,15 @@
       "department": "Data & Analytics Office",
       "designation": "Data Analyst"
 
-      
+    },
+
+    {"name": "Samson",
+    "department": "Data & Analytics Office",
+    "designation": "Report Analyst"
+
+    },
+
+    {
       "name": "Bisola",
       "department": "Data & Analytics",
       "designation": "Report Analyst"
