@@ -1,12 +1,14 @@
-    [
-      {
-        "name": "Emmanuel",
-        "department": "Solution Delivery",
-        "designation": "Software Developer"
-    },
-    {
-      "name": "",
-      "department": "",
-      "designation": ""
+[
+
+  {
+    "name": "Emmanuel",
+    "department": "Solution Delivery",
+    "designation": "Software Developer"
+  },
+
+  {
+    "name": "Brian",
+    "department": "Solution Delivery",
+    "designation": "Software Developer"
   }
 ]
