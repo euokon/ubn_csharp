@@ -12,9 +12,14 @@
       "name": "",
       "department": "",
       "designation": ""
-      
+
       "name": "Bisola",
       "department": "Data & Analytics",
       "designation": "Report Analyst"
   }
+  {
+    "name": "Farida",
+    "department": "DAO",
+    "designation": "Data Scientist"
+}
 ]
