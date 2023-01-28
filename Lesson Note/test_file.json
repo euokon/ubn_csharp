@@ -20,8 +20,13 @@
     "designation": "Data solution developer"
   },
   {
-      "name": "",
-      "department": "",
-      "designation": ""
-  }
+    "name": "",
+    "department": "",
+    "designation": ""
+  },
+  {
+    "name": "Mofi",
+    "department": "Data and Analytics",
+    "designation": "Business Analyst"
+  }  
 ]
