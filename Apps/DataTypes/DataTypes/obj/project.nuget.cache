@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "uW3netpJpneu5+AYxntWptBMdwmI0MmQqjaZMg1HdUUhvrd+1TAf2LNcqbQpDgleoWRBpxyWts9CtwMmNOvO6g==",
+  "success": true,
+  "projectFilePath": "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/DataTypes/DataTypes/DataTypes.csproj",
+  "expectedPackageFiles": [
+    "/Users/euokon/.nuget/packages/microsoft.aspnetcore.app.ref/3.1.10/microsoft.aspnetcore.app.ref.3.1.10.nupkg.sha512",
+    "/Users/euokon/.nuget/packages/microsoft.netcore.app.host.osx-x64/3.1.32/microsoft.netcore.app.host.osx-x64.3.1.32.nupkg.sha512",
+    "/Users/euokon/.nuget/packages/microsoft.netcore.app.ref/3.1.0/microsoft.netcore.app.ref.3.1.0.nupkg.sha512"
+  ],
+  "logs": []
+}
