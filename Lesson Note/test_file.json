@@ -10,9 +10,9 @@
     "designation": "Software Developer"
   },
   {
-      "name": "Bisola",
-      "department": "Data & Analytics",
-      "designation": "Report Analyst"
+    "name": "Bisola",
+    "department": "Data & Analytics",
+    "designation": "Report Analyst"
   },
   {
     "name": "Tashy",
@@ -30,14 +30,14 @@
     "designation": "Business Analyst"
   },
   {
-        "name": "Nathan",
-        "department": "DAO",
-        "designation": "Data Scientist"
+    "name": "Nathan",
+    "department": "DAO",
+    "designation": "Data Scientist"
   },
   {
-      "name": "Samson",
-      "department": "Data Analytics Office",
-      "designation": "Data Analyst"
+    "name": "Samson",
+    "department": "Data Analytics Office",
+    "designation": "Data Analyst"
   },
   {
     "name": "Victor",
