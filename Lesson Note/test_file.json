@@ -13,9 +13,21 @@
       "department": "",
       "designation": ""
 
+[
+  
+    "name": "Brian",
+    "department": "Solution Delivery",
+    "designation": "Software Developer"
+  },
+  {
       "name": "Bisola",
       "department": "Data & Analytics",
       "designation": "Report Analyst"
+  },
+  {
+    "name": "Steve",
+    "department": "Data & Analytics",
+    "designation": "Report Analyst"
   }
   {
     "name": "Farida",
@@ -26,10 +38,5 @@
         "department": "Data and Analytics",
         "designation": "Business Analyst"
     } ,
-    {"name": "Bisola",
-    "department": "Data & Analytics",
-    "designation": "Report Analyst"
-  }
-      
     
 ]
