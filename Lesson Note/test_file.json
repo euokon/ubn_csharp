@@ -12,5 +12,10 @@
       "name": "Bisola",
       "department": "Data & Analytics",
       "designation": "Report Analyst"
-  }
+  },
+  {
+    "name": "Victor",
+    "department": "Artificial Intelligence and Insights",
+    "designation": "Data Scientist"
+}
 ]
