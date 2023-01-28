@@ -28,5 +28,10 @@
     "name": "Mofi",
     "department": "Data and Analytics",
     "designation": "Business Analyst"
-  }  
+  },
+    {
+        "name": "Nathan",
+        "department": "DAO",
+        "designation": "Data Scientist"
+    }
 ]
