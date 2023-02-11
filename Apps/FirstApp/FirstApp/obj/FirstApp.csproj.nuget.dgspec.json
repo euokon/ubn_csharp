@@ -1,25 +1,32 @@
 {
   "format": 1,
   "restore": {
-    "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/FirstApp.csproj": {}
+    "C:\\Users\\soadetoyi\\Desktop\\c_sharp\\ubn_csharp\\Apps\\FirstApp\\FirstApp\\FirstApp.csproj": {}
   },
   "projects": {
-    "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/FirstApp.csproj": {
+    "C:\\Users\\soadetoyi\\Desktop\\c_sharp\\ubn_csharp\\Apps\\FirstApp\\FirstApp\\FirstApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/FirstApp.csproj",
+        "projectUniqueName": "C:\\Users\\soadetoyi\\Desktop\\c_sharp\\ubn_csharp\\Apps\\FirstApp\\FirstApp\\FirstApp.csproj",
         "projectName": "FirstApp",
-        "projectPath": "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/FirstApp.csproj",
-        "packagesPath": "/Users/euokon/.nuget/packages/",
-        "outputPath": "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/obj/",
+        "projectPath": "C:\\Users\\soadetoyi\\Desktop\\c_sharp\\ubn_csharp\\Apps\\FirstApp\\FirstApp\\FirstApp.csproj",
+        "packagesPath": "C:\\Users\\soadetoyi\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\soadetoyi\\Desktop\\c_sharp\\ubn_csharp\\Apps\\FirstApp\\FirstApp\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/Users/euokon/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\soadetoyi\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net6.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -53,7 +60,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.101/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.402\\RuntimeIdentifierGraph.json"
         }
       }
     }
