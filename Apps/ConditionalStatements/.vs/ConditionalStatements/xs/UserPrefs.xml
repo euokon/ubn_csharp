@@ -1,4 +1,25 @@
 ﻿<Properties StartupConfiguration="{403F4781-0C49-47B9-8659-2733F261BC46}|Default">
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.Workbench ActiveDocument="ConditionalStatements/Program.cs">
+    <Files>
+      <File FileName="ConditionalStatements/Program.cs" Line="80" Column="26" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="ConditionalStatements" expanded="True">
+            <Node name="ConditionalStatements" expanded="True">
+              <Node name="Program.cs" selected="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.ItemProperties.ConditionalStatements FirstBuild="True" />
+  <MonoDevelop.Ide.ItemProperties.ConditionalStatements PreferredExecutionTarget="MonoDevelop.Default" />
 </Properties>
