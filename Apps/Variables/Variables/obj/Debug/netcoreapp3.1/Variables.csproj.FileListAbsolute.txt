@@ -1,0 +1,14 @@
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/Variables/Variables/bin/Debug/netcoreapp3.1/Variables
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/Variables/Variables/bin/Debug/netcoreapp3.1/Variables.deps.json
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/Variables/Variables/bin/Debug/netcoreapp3.1/Variables.runtimeconfig.json
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/Variables/Variables/bin/Debug/netcoreapp3.1/Variables.runtimeconfig.dev.json
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/Variables/Variables/bin/Debug/netcoreapp3.1/Variables.dll
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/Variables/Variables/bin/Debug/netcoreapp3.1/Variables.pdb
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/Variables/Variables/obj/Debug/netcoreapp3.1/Variables.csproj.AssemblyReference.cache
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/Variables/Variables/obj/Debug/netcoreapp3.1/Variables.GeneratedMSBuildEditorConfig.editorconfig
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/Variables/Variables/obj/Debug/netcoreapp3.1/Variables.AssemblyInfoInputs.cache
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/Variables/Variables/obj/Debug/netcoreapp3.1/Variables.AssemblyInfo.cs
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/Variables/Variables/obj/Debug/netcoreapp3.1/Variables.csproj.CoreCompileInputs.cache
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/Variables/Variables/obj/Debug/netcoreapp3.1/Variables.dll
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/Variables/Variables/obj/Debug/netcoreapp3.1/Variables.pdb
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/Variables/Variables/obj/Debug/netcoreapp3.1/Variables.genruntimeconfig.cache
