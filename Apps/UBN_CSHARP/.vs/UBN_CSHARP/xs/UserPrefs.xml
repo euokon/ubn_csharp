@@ -1,4 +1,43 @@
 ﻿<Properties StartupConfiguration="{D3D1E57F-A998-4F4E-8CE8-F4542CFC8BB9}|Default">
   <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.ItemProperties.UBN__CSHARP FirstBuild="True" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workbench ActiveDocument="UBN_CSHARP/Repository/CustomerRepository.cs">
+    <Files>
+      <File FileName="UBN_CSHARP/Startup.cs" Line="61" Column="32" />
+      <File FileName="UBN_CSHARP/appsettings.json" Line="1" Column="1" />
+      <File FileName="UBN_CSHARP/Properties/launchSettings.json" Line="23" Column="28" />
+      <File FileName="UBN_CSHARP/Controllers/WeatherForecastController.cs" Line="11" Column="28" />
+      <File FileName="UBN_CSHARP/Controllers/ValuesController.cs" Line="1" Column="1" />
+      <File FileName="UBN_CSHARP/Controllers/SimpleApiController.cs" Line="54" Column="41" />
+      <File FileName="UBN_CSHARP/Controllers/ArraysController.cs" Line="146" Column="13" />
+      <File FileName="UBN_CSHARP/Models/DataObj.cs" Line="7" Column="18" />
+      <File FileName="UBN_CSHARP/Models/UserData.cs" Line="73" Column="39" />
+      <File FileName="UBN_CSHARP/Models/UserObj.cs" Line="6" Column="23" />
+      <File FileName="UBN_CSHARP/Models/AccountData.cs" Line="97" Column="32" />
+      <File FileName="UBN_CSHARP/Repository/UserRepository.cs" Line="34" Column="19" />
+      <File FileName="UBN_CSHARP/Repository/AccountRepository.cs" Line="34" Column="89" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="UBN_CSHARP" expanded="True">
+            <Node name="UBN_CSHARP" expanded="True">
+              <Node name="Controllers" expanded="True" />
+              <Node name="Models" expanded="True" />
+              <Node name="Repository" expanded="True">
+                <Node name="CustomerRepository.cs" selected="True" />
+              </Node>
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/UBN_CSHARP/UBN_CSHARP/Controllers/SimpleApiController.cs" relfile="UBN_CSHARP/Controllers/SimpleApiController.cs" line="36" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.ItemProperties.UBN__CSHARP PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
 </Properties>
