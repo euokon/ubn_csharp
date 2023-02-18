@@ -1,0 +1,23 @@
+﻿<Properties StartupConfiguration="{BCE9F109-9C79-43F0-86F9-5D427DB2E549}|Default">
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.Workbench ActiveDocument="RelationalOperator/Program.cs">
+    <Files>
+      <File FileName="RelationalOperator/Program.cs" Line="19" Column="33" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="RelationalOperator" expanded="True">
+            <Node name="RelationalOperator" expanded="True" />
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.RelationalOperator PreferredExecutionTarget="MonoDevelop.Default" />
+</Properties>

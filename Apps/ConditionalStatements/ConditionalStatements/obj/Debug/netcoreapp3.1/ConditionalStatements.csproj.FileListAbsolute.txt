@@ -1,0 +1,14 @@
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/ConditionalStatements/ConditionalStatements/bin/Debug/netcoreapp3.1/ConditionalStatements
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/ConditionalStatements/ConditionalStatements/bin/Debug/netcoreapp3.1/ConditionalStatements.deps.json
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/ConditionalStatements/ConditionalStatements/bin/Debug/netcoreapp3.1/ConditionalStatements.runtimeconfig.json
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/ConditionalStatements/ConditionalStatements/bin/Debug/netcoreapp3.1/ConditionalStatements.runtimeconfig.dev.json
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/ConditionalStatements/ConditionalStatements/bin/Debug/netcoreapp3.1/ConditionalStatements.dll
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/ConditionalStatements/ConditionalStatements/bin/Debug/netcoreapp3.1/ConditionalStatements.pdb
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/ConditionalStatements/ConditionalStatements/obj/Debug/netcoreapp3.1/ConditionalStatements.csproj.AssemblyReference.cache
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/ConditionalStatements/ConditionalStatements/obj/Debug/netcoreapp3.1/ConditionalStatements.GeneratedMSBuildEditorConfig.editorconfig
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/ConditionalStatements/ConditionalStatements/obj/Debug/netcoreapp3.1/ConditionalStatements.AssemblyInfoInputs.cache
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/ConditionalStatements/ConditionalStatements/obj/Debug/netcoreapp3.1/ConditionalStatements.AssemblyInfo.cs
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/ConditionalStatements/ConditionalStatements/obj/Debug/netcoreapp3.1/ConditionalStatements.csproj.CoreCompileInputs.cache
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/ConditionalStatements/ConditionalStatements/obj/Debug/netcoreapp3.1/ConditionalStatements.dll
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/ConditionalStatements/ConditionalStatements/obj/Debug/netcoreapp3.1/ConditionalStatements.pdb
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/ConditionalStatements/ConditionalStatements/obj/Debug/netcoreapp3.1/ConditionalStatements.genruntimeconfig.cache
