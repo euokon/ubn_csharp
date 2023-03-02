@@ -1,4 +1,31 @@
 ﻿<Properties StartupConfiguration="{AEDF36E6-1B18-4323-8AB4-718BC6BC12E7}|Default">
-  <MonoDevelop.Ide.ItemProperties.LinqExampole FirstBuild="True" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="LinqExampole/Controllers/LingExplController.cs">
+    <Files>
+      <File FileName="LinqExampole/Models/AccountsData.cs" Line="52" Column="44" />
+      <File FileName="LinqExampole/Models/CustomersData.cs" Line="59" Column="34" />
+      <File FileName="LinqExampole/Models/UserData.cs" Line="25" Column="26" />
+      <File FileName="LinqExampole/Controllers/LingExplController.cs" Line="143" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="LinqExampole" expanded="True">
+            <Node name="LinqExampole" expanded="True">
+              <Node name="Controllers" expanded="True">
+                <Node name="LingExplController.cs" selected="True" />
+              </Node>
+              <Node name="Models" expanded="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.ItemProperties.LinqExampole PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
   <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
 </Properties>
