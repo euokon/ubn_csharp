@@ -1,25 +1,27 @@
 {
   "format": 1,
   "restore": {
-    "/Users/euokon/Documents/GitHub/NewApps/WebAppMvc/WebAppMvc/WebAppMvc.csproj": {}
+    "C:\\Users\\SN030858\\Documents\\FSD\\Projects\\SomeApps\\ubn_csharp\\Apps\\WebAppMvc\\WebAppMvc\\WebAppMvc.csproj": {}
   },
   "projects": {
-    "/Users/euokon/Documents/GitHub/NewApps/WebAppMvc/WebAppMvc/WebAppMvc.csproj": {
+    "C:\\Users\\SN030858\\Documents\\FSD\\Projects\\SomeApps\\ubn_csharp\\Apps\\WebAppMvc\\WebAppMvc\\WebAppMvc.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/euokon/Documents/GitHub/NewApps/WebAppMvc/WebAppMvc/WebAppMvc.csproj",
+        "projectUniqueName": "C:\\Users\\SN030858\\Documents\\FSD\\Projects\\SomeApps\\ubn_csharp\\Apps\\WebAppMvc\\WebAppMvc\\WebAppMvc.csproj",
         "projectName": "WebAppMvc",
-        "projectPath": "/Users/euokon/Documents/GitHub/NewApps/WebAppMvc/WebAppMvc/WebAppMvc.csproj",
-        "packagesPath": "/Users/euokon/.nuget/packages/",
-        "outputPath": "/Users/euokon/Documents/GitHub/NewApps/WebAppMvc/WebAppMvc/obj/",
+        "projectPath": "C:\\Users\\SN030858\\Documents\\FSD\\Projects\\SomeApps\\ubn_csharp\\Apps\\WebAppMvc\\WebAppMvc\\WebAppMvc.csproj",
+        "packagesPath": "C:\\Users\\SN030858\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\SN030858\\Documents\\FSD\\Projects\\SomeApps\\ubn_csharp\\Apps\\WebAppMvc\\WebAppMvc\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/euokon/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\SN030858\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net6.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -56,7 +58,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.102/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.400\\RuntimeIdentifierGraph.json"
         }
       }
     }
