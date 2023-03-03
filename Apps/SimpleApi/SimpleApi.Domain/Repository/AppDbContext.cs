@@ -3,6 +3,7 @@ using System.Data;
 using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Oracle.ManagedDataAccess.Client;
 
 namespace SimpleApi.Domain.Repository
 {
@@ -21,6 +22,7 @@ namespace SimpleApi.Domain.Repository
         }
 
         public IDbConnection CreateConnection() => new SqlConnection(_connectionString);
+        public IDbConnection CreateOracleConn() => new OracleConnection(_connectionString);
 
     }
 }

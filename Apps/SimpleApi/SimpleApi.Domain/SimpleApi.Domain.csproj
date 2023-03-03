@@ -17,6 +17,7 @@
     <None Remove="Microsoft.Extensions.Logging" />
     <None Remove="Dapper" />
     <None Remove="Services\Interfaces\" />
+    <None Remove="Oracle.ManagedDataAccess.Core" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Repository\" />
@@ -31,5 +32,6 @@
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
     <PackageReference Include="Dapper" Version="2.0.4" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.90" />
   </ItemGroup>
 </Project>
