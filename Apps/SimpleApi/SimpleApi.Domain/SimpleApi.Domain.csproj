@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Repository\" />
+    <None Remove="Services\" />
+    <None Remove="Models\" />
+    <None Remove="Repository\Interfaces\" />
+    <None Remove="System.Data.Common" />
+    <None Remove="Microsoft.Extensions.Configuration" />
+    <None Remove="Microsoft.Data.SqlClient" />
+    <None Remove="Microsoft.Extensions.Logging" />
+    <None Remove="Dapper" />
+    <None Remove="Services\Interfaces\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Repository\" />
+    <Folder Include="Services\" />
+    <Folder Include="Models\" />
+    <Folder Include="Repository\Interfaces\" />
+    <Folder Include="Services\Interfaces\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Data.Common" Version="4.3.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
+    <PackageReference Include="Dapper" Version="2.0.4" />
+  </ItemGroup>
+</Project>
