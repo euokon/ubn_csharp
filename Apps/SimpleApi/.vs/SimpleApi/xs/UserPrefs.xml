@@ -1,0 +1,47 @@
+﻿<Properties StartupConfiguration="{4C5288AE-F97B-4611-ABFB-CBC0B9C69FAF}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="SimpleApi.Domain/Repository/AppDbContext.cs">
+    <Files>
+      <File FileName="SimpleApi/appsettings.json" Line="2" Column="25" />
+      <File FileName="SimpleApi.Domain/Models/UserData.cs" Line="24" Column="28" />
+      <File FileName="SimpleApi.Domain/Repository/UserRepository.cs" Line="93" Column="60" />
+      <File FileName="SimpleApi.Domain/Repository/Interfaces/IUserRepository.cs" Line="6" Column="34" />
+      <File FileName="SimpleApi.Domain/Repository/AppDbContext.cs" Line="15" Column="51" />
+      <File FileName="SimpleApi.Domain/Services/UserService.cs" Line="43" Column="53" />
+      <File FileName="SimpleApi.Domain/Services/Interfaces/IUserService.cs" Line="10" Column="55" />
+      <File FileName="SimpleApi/Controllers/UserController.cs" Line="42" Column="14" />
+      <File FileName="SimpleApi/Program.cs" Line="8" Column="12" />
+      <File FileName="../../../../../../.nuget/packages/oracle.manageddataaccess.core/3.21.90/readme.txt" Line="1" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="SimpleApi" expanded="True">
+            <Node name="SimpleApi" expanded="True">
+              <Node name="Controllers" expanded="True" />
+              <Node name="Properties" expanded="True" />
+            </Node>
+            <Node name="SimpleApi.Domain" expanded="True">
+              <Node name="Dependencies" expanded="True">
+                <Node name="PackageDependencies" expanded="True" />
+              </Node>
+              <Node name="Models" expanded="True" />
+              <Node name="Repository" expanded="True">
+                <Node name="Interfaces" expanded="True" />
+              </Node>
+              <Node name="Services" expanded="True">
+                <Node name="Interfaces" expanded="True" />
+              </Node>
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.ItemProperties.SimpleApi PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+</Properties>
