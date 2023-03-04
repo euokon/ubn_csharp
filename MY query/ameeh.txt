@@ -1,0 +1,66 @@
+select a.branch_code,
+       a.cust_no,
+       a.cust_ac_no,
+       a.ac_desc,
+       a.account_class,
+       b.cr_bal_lcy,
+       a.business_segment,
+       a.intr_code,
+       c.period,
+       c.entry_seq_no no_of_withdrawals
+  from account_master a,
+       dep_hist b,
+       (select *
+          from (select ac_no,
+                       trn_dt,
+                       entry_seq_no,
+                       to_char(trn_dt, 'yyyy-mm') period
+                  from actb_history
+                 where narration like '%WITHDRAWAL%')
+         where entry_seq_no < 4) c
+ where a.cust_ac_no = b.cust_ac_no(+)
+   and a.cust_ac_no = c.ac_no(+)
+   and b.business_date = a.ac_open_date
+   and a.account_class in ('SA_001', 'SA_047', 'CA_007', 'SA_008', 'SA_040', 'SA_041', 'SA_042')
+   and b.cr_bal_lcy < 2500
+   and a.lcy_opening_bal < 1000
+   and b.intr_payable = 0
+   and b.business_date >= '01may2021'
+----------------------------------------------------------
+select distinct(b.cust_no) account_no, a.trn_dt, a.trn_ref_no, a.ac_branch, a.lcy_amount, a.narration
+  from actb_history a, ameh b
+ where a.ac_no = b.cust_no(+)
+ and narration like '%CRDTBRU_PAY%'
+   and trn_dt >= '01aug2021'
+   and b.cust_no is not null
+
+
+
+ ------------------------------------------------------------------------
+select a.branch_code,
+       a.cust_no,
+       a.cust_ac_no,
+       a.ac_desc,
+       a.account_class,
+       b.cr_bal_lcy,
+       a.business_segment,
+       a.intr_code, c.period,
+       c.entry_seq_no no_of_withdrawals
+  from account_master a,
+       dep_hist b,
+       (select *
+          from (select ac_no,
+                       trn_dt,
+                       entry_seq_no,
+                       to_char(trn_dt, 'yyyy-mm') period
+                  from actb_history
+                 where narration like '%WITHDRAWAL%')
+         where entry_seq_no < 4) c
+ where a.cust_ac_no = b.cust_ac_no(+)
+   and a.cust_ac_no = c.ac_no(+)
+   and b.business_date = a.ac_open_date
+ and a.account_class in ('SA_043', 'SA_044', 'SA_045', 'SA_046')
+ and b.cr_bal_lcy < 1000
+ and a.lcy_opening_bal < 1000
+ and b.intr_payable = 0
+ and b.business_date >= '01may2021'

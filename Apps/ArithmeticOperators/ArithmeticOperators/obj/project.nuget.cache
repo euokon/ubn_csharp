@@ -1,12 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "VcYL1VQ/ZcEMB45CTm7swVu0guKSL1VxyYxP5qqQuXe+nRJfWtRz/e5GnupyLCdP0rrqGqUjQ3tGWNpoX7v0Qw==",
+  "dgSpecHash": "OhaDzpPZK6vFzDO8RiCOVctP77YKndl2cv4nmmS/9cJC5jdr6+r+t1qO6CcFtTMn+qylv9teKQoNPZxCr8RV2Q==",
   "success": true,
-  "projectFilePath": "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/ArithmeticOperators/ArithmeticOperators/ArithmeticOperators.csproj",
-  "expectedPackageFiles": [
-    "/Users/euokon/.nuget/packages/microsoft.aspnetcore.app.ref/3.1.10/microsoft.aspnetcore.app.ref.3.1.10.nupkg.sha512",
-    "/Users/euokon/.nuget/packages/microsoft.netcore.app.host.osx-x64/3.1.32/microsoft.netcore.app.host.osx-x64.3.1.32.nupkg.sha512",
-    "/Users/euokon/.nuget/packages/microsoft.netcore.app.ref/3.1.0/microsoft.netcore.app.ref.3.1.0.nupkg.sha512"
-  ],
+  "projectFilePath": "C:\\Users\\boakpore\\Documents\\GitHub\\ubn_csharp\\Apps\\ArithmeticOperators\\ArithmeticOperators\\ArithmeticOperators.csproj",
+  "expectedPackageFiles": [],
   "logs": []
 }

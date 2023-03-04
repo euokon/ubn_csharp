@@ -1,12 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "t+bvkiKRrSY66CQJsfHAQNszkGJvm8DVKr0Q9gPpVZ1BP3Vlvue5mTv7h56hjgR/+IFfubIVWk/JjJAUD5OlzA==",
+  "dgSpecHash": "bLBBEO/iD6ruR2O238cGrb6xgeQfaIU8x5a07cKe+ZwyHEewwR51HlPAtUUMYv6OiERlsAlnKMtzvWOOoGEqbA==",
   "success": true,
-  "projectFilePath": "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/Variables/Variables/Variables.csproj",
-  "expectedPackageFiles": [
-    "/Users/euokon/.nuget/packages/microsoft.aspnetcore.app.ref/3.1.10/microsoft.aspnetcore.app.ref.3.1.10.nupkg.sha512",
-    "/Users/euokon/.nuget/packages/microsoft.netcore.app.host.osx-x64/3.1.32/microsoft.netcore.app.host.osx-x64.3.1.32.nupkg.sha512",
-    "/Users/euokon/.nuget/packages/microsoft.netcore.app.ref/3.1.0/microsoft.netcore.app.ref.3.1.0.nupkg.sha512"
-  ],
+  "projectFilePath": "C:\\Users\\boakpore\\Documents\\GitHub\\ubn_csharp\\Apps\\Variables\\Variables\\Variables.csproj",
+  "expectedPackageFiles": [],
   "logs": []
 }

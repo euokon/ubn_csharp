@@ -1,12 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "9B7s4yJDztnb8FCSzZdp1iOz9PTpN6Ha9V/7a9mp9bFRUQV1djVBjawqWwo3GW3fCINLyxUYqFFQCCNLAVbEFw==",
+  "dgSpecHash": "HsNS3K9SFlvBZE7BYrzUYZ3NMbdpCvbJPLNwZBjCCsQZFqxDs7xVXA1rGvJVwJI0UtbuvLlUFBIq88pOkn++aA==",
   "success": true,
-  "projectFilePath": "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/SecondApp/SecondApp/SecondApp.csproj",
-  "expectedPackageFiles": [
-    "/Users/euokon/.nuget/packages/microsoft.aspnetcore.app.ref/3.1.10/microsoft.aspnetcore.app.ref.3.1.10.nupkg.sha512",
-    "/Users/euokon/.nuget/packages/microsoft.netcore.app.host.osx-x64/3.1.32/microsoft.netcore.app.host.osx-x64.3.1.32.nupkg.sha512",
-    "/Users/euokon/.nuget/packages/microsoft.netcore.app.ref/3.1.0/microsoft.netcore.app.ref.3.1.0.nupkg.sha512"
-  ],
+  "projectFilePath": "C:\\Users\\boakpore\\Documents\\GitHub\\ubn_csharp\\Apps\\SecondApp\\SecondApp\\SecondApp.csproj",
+  "expectedPackageFiles": [],
   "logs": []
 }

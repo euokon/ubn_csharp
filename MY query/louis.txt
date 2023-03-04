@@ -1,0 +1,39 @@
+select a.cust_no,
+               a.cust_ac_no,
+               a.ac_desc,
+               a.lcy_balance,
+               a.account_class,
+               a.description,
+               c.ac_open_date,
+               decode(UPPER(c.record_stat),
+                      'C',
+                      'CLOSED',
+                      'O',
+                      'OPEN') record_stat,
+               a.ccy_code,
+               a.bus_sgt,
+               a.rm_code,
+               a.branch_code,
+               a.period
+          from dep_tbl_me_hist a, account_master c
+         where a.cust_ac_no = c.cust_ac_no(+)
+         and a.account_class in ('SA_014',
+                                   'SA_016',
+                                   'SA_017',
+                                   'SA_018',
+                                   'SA_019',
+                                   'SA_020',
+                                   'SA_022',
+                                   'SA_023',
+                                   'SA_024',
+                                   'SA_025',
+                                   'SA_036')
+           and a.period >= '202110'
+           and NOT exists (select b.*
+                  from (select cust_ac_no, count(*)
+                          from dep_tbl_me_hist
+                          WHERE intr_payable = 0
+                         group by cust_ac_no
+                        having count(distinct intr_payable) = 1) b
+                 where a.cust_ac_no = b.cust_ac_no)
+

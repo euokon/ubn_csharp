@@ -1,30 +1,31 @@
 {
   "format": 1,
   "restore": {
-    "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/FirstApp.csproj": {}
+    "C:\\Users\\boakpore\\Documents\\GitHub\\ubn_csharp\\Apps\\FirstApp\\FirstApp\\FirstApp.csproj": {}
   },
   "projects": {
-    "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/FirstApp.csproj": {
+    "C:\\Users\\boakpore\\Documents\\GitHub\\ubn_csharp\\Apps\\FirstApp\\FirstApp\\FirstApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/FirstApp.csproj",
+        "projectUniqueName": "C:\\Users\\boakpore\\Documents\\GitHub\\ubn_csharp\\Apps\\FirstApp\\FirstApp\\FirstApp.csproj",
         "projectName": "FirstApp",
-        "projectPath": "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/FirstApp.csproj",
-        "packagesPath": "/Users/euokon/.nuget/packages/",
-        "outputPath": "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/FirstApp/FirstApp/obj/",
+        "projectPath": "C:\\Users\\boakpore\\Documents\\GitHub\\ubn_csharp\\Apps\\FirstApp\\FirstApp\\FirstApp.csproj",
+        "packagesPath": "C:\\Users\\boakpore\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\boakpore\\Documents\\GitHub\\ubn_csharp\\Apps\\FirstApp\\FirstApp\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/euokon/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\boakpore\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net6.0"
+          "net60"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net6.0": {
-            "targetAlias": "net6.0",
+          "net60": {
             "projectReferences": {}
           }
         },
@@ -35,25 +36,13 @@
         }
       },
       "frameworks": {
-        "net6.0": {
-          "targetAlias": "net6.0",
-          "imports": [
-            "net461",
-            "net462",
-            "net47",
-            "net471",
-            "net472",
-            "net48",
-            "net481"
-          ],
-          "assetTargetFallback": true,
-          "warn": true,
-          "frameworkReferences": {
-            "Microsoft.NETCore.App": {
-              "privateAssets": "all"
-            }
-          },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.101/RuntimeIdentifierGraph.json"
+        "net60": {
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.200\\RuntimeIdentifierGraph.json"
+        }
+      },
+      "runtimes": {
+        "win7-x86": {
+          "#import": []
         }
       }
     }

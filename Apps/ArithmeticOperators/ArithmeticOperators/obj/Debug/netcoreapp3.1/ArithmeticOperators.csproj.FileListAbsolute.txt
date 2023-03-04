@@ -12,3 +12,17 @@
 /Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/ArithmeticOperators/ArithmeticOperators/obj/Debug/netcoreapp3.1/ArithmeticOperators.dll
 /Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/ArithmeticOperators/ArithmeticOperators/obj/Debug/netcoreapp3.1/ArithmeticOperators.pdb
 /Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/ArithmeticOperators/ArithmeticOperators/obj/Debug/netcoreapp3.1/ArithmeticOperators.genruntimeconfig.cache
+C:\Users\boakpore\Documents\GitHub\ubn_csharp\Apps\ArithmeticOperators\ArithmeticOperators\bin\Debug\netcoreapp3.1\ArithmeticOperators.exe
+C:\Users\boakpore\Documents\GitHub\ubn_csharp\Apps\ArithmeticOperators\ArithmeticOperators\bin\Debug\netcoreapp3.1\ArithmeticOperators.deps.json
+C:\Users\boakpore\Documents\GitHub\ubn_csharp\Apps\ArithmeticOperators\ArithmeticOperators\bin\Debug\netcoreapp3.1\ArithmeticOperators.runtimeconfig.json
+C:\Users\boakpore\Documents\GitHub\ubn_csharp\Apps\ArithmeticOperators\ArithmeticOperators\bin\Debug\netcoreapp3.1\ArithmeticOperators.runtimeconfig.dev.json
+C:\Users\boakpore\Documents\GitHub\ubn_csharp\Apps\ArithmeticOperators\ArithmeticOperators\bin\Debug\netcoreapp3.1\ArithmeticOperators.dll
+C:\Users\boakpore\Documents\GitHub\ubn_csharp\Apps\ArithmeticOperators\ArithmeticOperators\bin\Debug\netcoreapp3.1\ArithmeticOperators.pdb
+C:\Users\boakpore\Documents\GitHub\ubn_csharp\Apps\ArithmeticOperators\ArithmeticOperators\obj\Debug\netcoreapp3.1\ArithmeticOperators.csproj.CoreCompileInputs.cache
+C:\Users\boakpore\Documents\GitHub\ubn_csharp\Apps\ArithmeticOperators\ArithmeticOperators\obj\Debug\netcoreapp3.1\ArithmeticOperators.AssemblyInfoInputs.cache
+C:\Users\boakpore\Documents\GitHub\ubn_csharp\Apps\ArithmeticOperators\ArithmeticOperators\obj\Debug\netcoreapp3.1\ArithmeticOperators.AssemblyInfo.cs
+C:\Users\boakpore\Documents\GitHub\ubn_csharp\Apps\ArithmeticOperators\ArithmeticOperators\obj\Debug\netcoreapp3.1\ArithmeticOperators.dll
+C:\Users\boakpore\Documents\GitHub\ubn_csharp\Apps\ArithmeticOperators\ArithmeticOperators\obj\Debug\netcoreapp3.1\ArithmeticOperators.pdb
+C:\Users\boakpore\Documents\GitHub\ubn_csharp\Apps\ArithmeticOperators\ArithmeticOperators\obj\Debug\netcoreapp3.1\ArithmeticOperators.genruntimeconfig.cache
+C:\Users\boakpore\Documents\GitHub\ubn_csharp\Apps\ArithmeticOperators\ArithmeticOperators\obj\Debug\netcoreapp3.1\ArithmeticOperators.csproj.AssemblyReference.cache
+C:\Users\boakpore\Documents\GitHub\ubn_csharp\Apps\ArithmeticOperators\ArithmeticOperators\obj\Debug\netcoreapp3.1\ArithmeticOperators.GeneratedMSBuildEditorConfig.editorconfig
