@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\boakpore\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\UBN_CSHARP.csproj": {}
+    "C:\\Users\\NCCLIFFORD\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\UBN_CSHARP.csproj": {}
   },
   "projects": {
-    "C:\\Users\\boakpore\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\UBN_CSHARP.csproj": {
+    "C:\\Users\\NCCLIFFORD\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\UBN_CSHARP.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\boakpore\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\UBN_CSHARP.csproj",
+        "projectUniqueName": "C:\\Users\\NCCLIFFORD\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\UBN_CSHARP.csproj",
         "projectName": "UBN_CSHARP",
-        "projectPath": "C:\\Users\\boakpore\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\UBN_CSHARP.csproj",
-        "packagesPath": "C:\\Users\\boakpore\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\boakpore\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\obj\\",
+        "projectPath": "C:\\Users\\NCCLIFFORD\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\UBN_CSHARP.csproj",
+        "packagesPath": "C:\\Users\\NCCLIFFORD\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\NCCLIFFORD\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\boakpore\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\NCCLIFFORD\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -45,10 +45,6 @@
         "netcoreapp3.1": {
           "targetAlias": "netcoreapp3.1",
           "dependencies": {
-            "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
-              "target": "Package",
-              "version": "[3.1.5, )"
-            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.5.0, )"
@@ -69,6 +65,24 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[3.1.10, 3.1.10]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[3.1.29, 3.1.29]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[3.1.0, 3.1.0]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[3.1.0, 3.1.0]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -77,7 +91,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.201\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.401\\RuntimeIdentifierGraph.json"
         }
       }
     }
