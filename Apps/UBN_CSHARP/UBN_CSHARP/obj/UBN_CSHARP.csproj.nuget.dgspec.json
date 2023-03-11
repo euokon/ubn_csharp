@@ -1,25 +1,32 @@
 {
   "format": 1,
   "restore": {
-    "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/UBN_CSHARP/UBN_CSHARP/UBN_CSHARP.csproj": {}
+    "C:\\Users\\NCCLIFFORD\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\UBN_CSHARP.csproj": {}
   },
   "projects": {
-    "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/UBN_CSHARP/UBN_CSHARP/UBN_CSHARP.csproj": {
+    "C:\\Users\\NCCLIFFORD\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\UBN_CSHARP.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/UBN_CSHARP/UBN_CSHARP/UBN_CSHARP.csproj",
+        "projectUniqueName": "C:\\Users\\NCCLIFFORD\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\UBN_CSHARP.csproj",
         "projectName": "UBN_CSHARP",
-        "projectPath": "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/UBN_CSHARP/UBN_CSHARP/UBN_CSHARP.csproj",
-        "packagesPath": "/Users/euokon/.nuget/packages/",
-        "outputPath": "/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/UBN_CSHARP/UBN_CSHARP/obj/",
+        "projectPath": "C:\\Users\\NCCLIFFORD\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\UBN_CSHARP.csproj",
+        "packagesPath": "C:\\Users\\NCCLIFFORD\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\NCCLIFFORD\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/Users/euokon/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\NCCLIFFORD\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netcoreapp3.1"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -64,11 +71,15 @@
               "version": "[3.1.10, 3.1.10]"
             },
             {
-              "name": "Microsoft.NETCore.App.Host.osx-x64",
-              "version": "[3.1.32, 3.1.32]"
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[3.1.29, 3.1.29]"
             },
             {
               "name": "Microsoft.NETCore.App.Ref",
+              "version": "[3.1.0, 3.1.0]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
               "version": "[3.1.0, 3.1.0]"
             }
           ],
@@ -80,7 +91,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.102/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.401\\RuntimeIdentifierGraph.json"
         }
       }
     }
