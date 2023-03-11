@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "DCI164ogZOyIRtj5ZOg8ZNZluoulgen93KpjGRRJeVg=",
+  "Source": "DatabaseConnection_api",
+  "BasePath": "_content/DatabaseConnection_api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
