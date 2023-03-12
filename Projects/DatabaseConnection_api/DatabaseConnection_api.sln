@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseConnection_api", "DatabaseConnection_api.csproj", "{AD269460-1EEA-41A4-A1CA-4AC1CB2D1997}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseConnection_api.domain", "..\DatabaseConnection_api.domain\DatabaseConnection_api.domain.csproj", "{02581863-8B98-438C-922B-00AE41D8512F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AD269460-1EEA-41A4-A1CA-4AC1CB2D1997}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD269460-1EEA-41A4-A1CA-4AC1CB2D1997}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD269460-1EEA-41A4-A1CA-4AC1CB2D1997}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD269460-1EEA-41A4-A1CA-4AC1CB2D1997}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02581863-8B98-438C-922B-00AE41D8512F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02581863-8B98-438C-922B-00AE41D8512F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02581863-8B98-438C-922B-00AE41D8512F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02581863-8B98-438C-922B-00AE41D8512F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1E3CE884-A86F-4A24-9EE9-ED9B381EA400}
+	EndGlobalSection
+EndGlobal
