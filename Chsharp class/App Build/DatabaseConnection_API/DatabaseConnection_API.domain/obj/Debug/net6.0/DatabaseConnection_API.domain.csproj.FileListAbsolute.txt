@@ -1,0 +1,12 @@
+C:\Users\NCCLIFFORD\Documents\GitHub\ubn_csharp\Chsharp class\App Build\DatabaseConnection_API\DatabaseConnection_API.domain\bin\Debug\net6.0\DatabaseConnection_API.domain.deps.json
+C:\Users\NCCLIFFORD\Documents\GitHub\ubn_csharp\Chsharp class\App Build\DatabaseConnection_API\DatabaseConnection_API.domain\bin\Debug\net6.0\DatabaseConnection_API.domain.dll
+C:\Users\NCCLIFFORD\Documents\GitHub\ubn_csharp\Chsharp class\App Build\DatabaseConnection_API\DatabaseConnection_API.domain\bin\Debug\net6.0\DatabaseConnection_API.domain.pdb
+C:\Users\NCCLIFFORD\Documents\GitHub\ubn_csharp\Chsharp class\App Build\DatabaseConnection_API\DatabaseConnection_API.domain\obj\Debug\net6.0\DatabaseConnection_API.domain.csproj.AssemblyReference.cache
+C:\Users\NCCLIFFORD\Documents\GitHub\ubn_csharp\Chsharp class\App Build\DatabaseConnection_API\DatabaseConnection_API.domain\obj\Debug\net6.0\DatabaseConnection_API.domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\NCCLIFFORD\Documents\GitHub\ubn_csharp\Chsharp class\App Build\DatabaseConnection_API\DatabaseConnection_API.domain\obj\Debug\net6.0\DatabaseConnection_API.domain.AssemblyInfoInputs.cache
+C:\Users\NCCLIFFORD\Documents\GitHub\ubn_csharp\Chsharp class\App Build\DatabaseConnection_API\DatabaseConnection_API.domain\obj\Debug\net6.0\DatabaseConnection_API.domain.AssemblyInfo.cs
+C:\Users\NCCLIFFORD\Documents\GitHub\ubn_csharp\Chsharp class\App Build\DatabaseConnection_API\DatabaseConnection_API.domain\obj\Debug\net6.0\DatabaseConnection_API.domain.csproj.CoreCompileInputs.cache
+C:\Users\NCCLIFFORD\Documents\GitHub\ubn_csharp\Chsharp class\App Build\DatabaseConnection_API\DatabaseConnection_API.domain\obj\Debug\net6.0\DatabaseConnection_API.domain.dll
+C:\Users\NCCLIFFORD\Documents\GitHub\ubn_csharp\Chsharp class\App Build\DatabaseConnection_API\DatabaseConnection_API.domain\obj\Debug\net6.0\refint\DatabaseConnection_API.domain.dll
+C:\Users\NCCLIFFORD\Documents\GitHub\ubn_csharp\Chsharp class\App Build\DatabaseConnection_API\DatabaseConnection_API.domain\obj\Debug\net6.0\DatabaseConnection_API.domain.pdb
+C:\Users\NCCLIFFORD\Documents\GitHub\ubn_csharp\Chsharp class\App Build\DatabaseConnection_API\DatabaseConnection_API.domain\obj\Debug\net6.0\ref\DatabaseConnection_API.domain.dll

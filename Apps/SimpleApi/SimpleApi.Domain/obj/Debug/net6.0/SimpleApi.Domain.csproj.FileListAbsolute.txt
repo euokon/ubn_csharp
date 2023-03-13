@@ -1,0 +1,12 @@
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/SimpleApi/SimpleApi.Domain/bin/Debug/net6.0/SimpleApi.Domain.deps.json
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/SimpleApi/SimpleApi.Domain/bin/Debug/net6.0/SimpleApi.Domain.dll
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/SimpleApi/SimpleApi.Domain/bin/Debug/net6.0/SimpleApi.Domain.pdb
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/SimpleApi/SimpleApi.Domain/obj/Debug/net6.0/SimpleApi.Domain.csproj.AssemblyReference.cache
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/SimpleApi/SimpleApi.Domain/obj/Debug/net6.0/SimpleApi.Domain.GeneratedMSBuildEditorConfig.editorconfig
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/SimpleApi/SimpleApi.Domain/obj/Debug/net6.0/SimpleApi.Domain.AssemblyInfoInputs.cache
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/SimpleApi/SimpleApi.Domain/obj/Debug/net6.0/SimpleApi.Domain.AssemblyInfo.cs
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/SimpleApi/SimpleApi.Domain/obj/Debug/net6.0/SimpleApi.Domain.csproj.CoreCompileInputs.cache
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/SimpleApi/SimpleApi.Domain/obj/Debug/net6.0/SimpleApi.Domain.dll
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/SimpleApi/SimpleApi.Domain/obj/Debug/net6.0/refint/SimpleApi.Domain.dll
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/SimpleApi/SimpleApi.Domain/obj/Debug/net6.0/SimpleApi.Domain.pdb
+/Users/euokon/Documents/GitHub/UBN_CSHARP/ubn_csharp/Apps/SimpleApi/SimpleApi.Domain/obj/Debug/net6.0/ref/SimpleApi.Domain.dll

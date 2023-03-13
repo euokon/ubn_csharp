@@ -1,3 +1,7 @@
 is_global = true
 build_property.RootNamespace = UBN_CSHARP
+<<<<<<< HEAD
 build_property.ProjectDir = c:\Users\soadetoyi\Desktop\c_sharp\ubn_csharp\Apps\UBN_CSHARP\UBN_CSHARP\
+=======
+build_property.ProjectDir = C:\Users\NCCLIFFORD\Documents\GitHub\ubn_csharp\Apps\UBN_CSHARP\UBN_CSHARP\
+>>>>>>> origin/alphabranch
