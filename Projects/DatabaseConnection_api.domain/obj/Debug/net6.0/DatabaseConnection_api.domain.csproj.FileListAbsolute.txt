@@ -1,0 +1,12 @@
+C:\Users\VSNWEKE\Documents\GitHub\ubn_csharp\Projects\DatabaseConnection_api.domain\bin\Debug\net6.0\DatabaseConnection_api.domain.deps.json
+C:\Users\VSNWEKE\Documents\GitHub\ubn_csharp\Projects\DatabaseConnection_api.domain\bin\Debug\net6.0\DatabaseConnection_api.domain.dll
+C:\Users\VSNWEKE\Documents\GitHub\ubn_csharp\Projects\DatabaseConnection_api.domain\bin\Debug\net6.0\DatabaseConnection_api.domain.pdb
+C:\Users\VSNWEKE\Documents\GitHub\ubn_csharp\Projects\DatabaseConnection_api.domain\obj\Debug\net6.0\DatabaseConnection_api.domain.csproj.AssemblyReference.cache
+C:\Users\VSNWEKE\Documents\GitHub\ubn_csharp\Projects\DatabaseConnection_api.domain\obj\Debug\net6.0\DatabaseConnection_api.domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\VSNWEKE\Documents\GitHub\ubn_csharp\Projects\DatabaseConnection_api.domain\obj\Debug\net6.0\DatabaseConnection_api.domain.AssemblyInfoInputs.cache
+C:\Users\VSNWEKE\Documents\GitHub\ubn_csharp\Projects\DatabaseConnection_api.domain\obj\Debug\net6.0\DatabaseConnection_api.domain.AssemblyInfo.cs
+C:\Users\VSNWEKE\Documents\GitHub\ubn_csharp\Projects\DatabaseConnection_api.domain\obj\Debug\net6.0\DatabaseConnection_api.domain.csproj.CoreCompileInputs.cache
+C:\Users\VSNWEKE\Documents\GitHub\ubn_csharp\Projects\DatabaseConnection_api.domain\obj\Debug\net6.0\DatabaseConnection_api.domain.dll
+C:\Users\VSNWEKE\Documents\GitHub\ubn_csharp\Projects\DatabaseConnection_api.domain\obj\Debug\net6.0\refint\DatabaseConnection_api.domain.dll
+C:\Users\VSNWEKE\Documents\GitHub\ubn_csharp\Projects\DatabaseConnection_api.domain\obj\Debug\net6.0\DatabaseConnection_api.domain.pdb
+C:\Users\VSNWEKE\Documents\GitHub\ubn_csharp\Projects\DatabaseConnection_api.domain\obj\Debug\net6.0\ref\DatabaseConnection_api.domain.dll

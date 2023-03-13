@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\DatabaseConnection_api.props" />
+</Project>

@@ -438,39 +438,23 @@
     ]
   },
   "packageFolders": {
-<<<<<<< HEAD
-    "C:\\Users\\soadetoyi\\.nuget\\packages\\": {},
-=======
-    "C:\\Users\\NCCLIFFORD\\.nuget\\packages\\": {},
->>>>>>> origin/alphabranch
+    "C:\\Users\\VSNWEKE\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-<<<<<<< HEAD
-      "projectUniqueName": "C:\\Users\\soadetoyi\\Desktop\\c_sharp\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\UBN_CSHARP.csproj",
+      "projectUniqueName": "C:\\Users\\VSNWEKE\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\UBN_CSHARP.csproj",
       "projectName": "UBN_CSHARP",
-      "projectPath": "C:\\Users\\soadetoyi\\Desktop\\c_sharp\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\UBN_CSHARP.csproj",
-      "packagesPath": "C:\\Users\\soadetoyi\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\soadetoyi\\Desktop\\c_sharp\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\obj\\",
-=======
-      "projectUniqueName": "C:\\Users\\NCCLIFFORD\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\UBN_CSHARP.csproj",
-      "projectName": "UBN_CSHARP",
-      "projectPath": "C:\\Users\\NCCLIFFORD\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\UBN_CSHARP.csproj",
-      "packagesPath": "C:\\Users\\NCCLIFFORD\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\NCCLIFFORD\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\obj\\",
->>>>>>> origin/alphabranch
+      "projectPath": "C:\\Users\\VSNWEKE\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\UBN_CSHARP.csproj",
+      "packagesPath": "C:\\Users\\VSNWEKE\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\VSNWEKE\\Documents\\GitHub\\ubn_csharp\\Apps\\UBN_CSHARP\\UBN_CSHARP\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-<<<<<<< HEAD
-        "C:\\Users\\soadetoyi\\AppData\\Roaming\\NuGet\\NuGet.Config",
-=======
-        "C:\\Users\\NCCLIFFORD\\AppData\\Roaming\\NuGet\\NuGet.Config",
->>>>>>> origin/alphabranch
+        "C:\\Users\\VSNWEKE\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -525,11 +509,7 @@
           },
           {
             "name": "Microsoft.NETCore.App.Host.win-x64",
-<<<<<<< HEAD
-            "version": "[3.1.30, 3.1.30]"
-=======
-            "version": "[3.1.29, 3.1.29]"
->>>>>>> origin/alphabranch
+            "version": "[3.1.32, 3.1.32]"
           },
           {
             "name": "Microsoft.NETCore.App.Ref",
@@ -548,11 +528,7 @@
             "privateAssets": "all"
           }
         },
-<<<<<<< HEAD
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.402\\RuntimeIdentifierGraph.json"
-=======
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.401\\RuntimeIdentifierGraph.json"
->>>>>>> origin/alphabranch
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.102\\RuntimeIdentifierGraph.json"
       }
     }
   }
